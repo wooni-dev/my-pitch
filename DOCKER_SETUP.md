@@ -100,6 +100,40 @@ docker-compose restart nginx
 docker-compose exec nginx nginx -t
 ```
 
+### 커스텀 도메인 사용 (hosts 파일 설정)
+
+Nginx의 `server_name`을 `my-pitch`로 설정한 경우, 브라우저에서 `http://my-pitch`로 접근하려면 운영체제의 hosts 파일을 수정해야 합니다.
+
+#### Windows
+
+관리자 권한으로 실행:
+
+```bash
+notepad C:\Windows\System32\drivers\etc\hosts
+```
+
+파일 끝에 추가:
+
+```
+127.0.0.1    my-pitch
+```
+
+#### macOS / Linux
+
+터미널에서 실행:
+
+```bash
+sudo nano /etc/hosts
+```
+
+파일 끝에 추가:
+
+```
+127.0.0.1    my-pitch
+```
+
+저장 후 (`Ctrl+O`, `Enter`, `Ctrl+X`), 컨테이너를 재시작하면 `http://my-pitch`로 접근 가능합니다.
+
 ## 🔧 유용한 명령어
 
 ### 컨테이너 내부 접속
