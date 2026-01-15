@@ -1,0 +1,48 @@
+# Python
+**/venv/
+**/.venv/
+**/__pycache__/
+**/*.py[cod]
+**/.pytest_cache/
+*.egg-info/
+dist/
+build/
+
+# Node.js
+node_modules/
+npm-debug.log
+package-lock.json
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Logs
+*.log
+
+# Docker volumes (컨테이너 데이터는 제외)
+volumes/
+
+# 임시 파일
+*.tmp
+*.bak
+*.swp
+*~
+
+# 빌드 결과
+dist/
+build/
+*.egg-info/
+
