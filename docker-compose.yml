@@ -27,6 +27,22 @@ services:
     stdin_open: true
     tty: true
 
+  fileserver:
+    image: minio/minio:latest
+    container_name: my-pitch-fileserver
+    ports:
+      - "9000:9000"  # API 포트
+      - "9001:9001"  # 웹 UI 포트
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    volumes:
+      - ./fileserver/data:/data
+    command: server /data --console-address ":9001"
+    restart: unless-stopped
+    networks:
+      - my-pitch-network
+
 networks:
   my-pitch-network:
     driver: bridge
