@@ -3,6 +3,7 @@
 # ===================================
 **/venv/
 **/.venv/
+api/venv/
 **/__pycache__/
 **/*.py[cod]
 **/*.pyo
@@ -22,6 +23,10 @@ htmlcov/
 .mypy_cache/
 .dmypy.json
 dmypy.json
+*.pyc
+*.whl
+.python-version
+__pypackages__/
 
 # ===================================
 # Node.js
@@ -42,6 +47,7 @@ yarn.lock
 .env.development.local
 .env.test.local
 .env.production.local
+!.env.example
 
 # ===================================
 # IDE & Editor
@@ -76,6 +82,9 @@ $RECYCLE.BIN/
 docker-compose.override.yml
 volumes/
 *.dockerignore.backup
+.docker/
+*.docker.tar
+docker-compose.*.override.yml
 
 # ===================================
 # Nginx
@@ -83,6 +92,8 @@ volumes/
 nginx/logs/
 nginx/*.log
 nginx/conf.d/*.backup
+nginx/cache/
+nginx/run/
 
 # ===================================
 # SSL/TLS Certificates
@@ -100,6 +111,8 @@ nginx/conf.d/*.backup
 # ===================================
 fileserver/data/*
 !fileserver/data/.gitkeep
+.minio.sys/
+*.minio.sys
 
 # ===================================
 # Logs
@@ -134,9 +147,31 @@ coverage.xml
 test-results/
 
 # ===================================
+# 데이터베이스
+# ===================================
+*.db
+*.sqlite
+*.sqlite3
+
+# ===================================
 # 기타
 # ===================================
 *.pid
 *.seed
 *.pid.lock
 .vscode-test
+.pytest_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+
+# ===================================
+# 음악 파일 (테스트용)
+# ===================================
+*.mp3
+*.wav
+*.flac
+*.m4a
+*.ogg
+*.aac
+!test_samples/*.mp3
+!test_samples/*.wav

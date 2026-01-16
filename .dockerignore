@@ -11,6 +11,7 @@
 # ===================================
 README.md
 *.md
+!LICENSES.md
 DOCKER_GUIDE.md
 DOCKER_SETUP.md
 LICENSE
@@ -26,6 +27,8 @@ Dockerfile
 .dockerignore
 *.dockerfile
 .docker/
+*.docker.tar
+docker-compose.*.override.yml
 
 # ===================================
 # 프로젝트별 제외 항목
@@ -36,6 +39,17 @@ nginx/
 fileserver/
 # 다른 서비스 디렉토리 (각 컨테이너는 자신의 것만 필요)
 api/venv/
+api/__pycache__/
+api/*.pyc
+api/LOCAL_DEV_SETUP.md
+
+# 음악 파일 (테스트용 제외)
+*.mp3
+*.wav
+*.flac
+*.m4a
+*.ogg
+*.aac
 
 # ===================================
 # Node.js
@@ -77,6 +91,10 @@ build/
 pip-log.txt
 .mypy_cache/
 .dmypy.json
+*.whl
+.ruff_cache/
+.pytest_cache/
+__pypackages__/
 
 # ===================================
 # IDE & 에디터 설정
@@ -93,7 +111,7 @@ pip-log.txt
 *.sublime-workspace
 
 # ===================================
-# 환경 변수
+# 환경 변수 (실제 환경 변수만 제외, .env.example은 포함)
 # ===================================
 .env
 .env.local
@@ -161,9 +179,25 @@ $RECYCLE.BIN/
 .cache/
 
 # ===================================
+# 데이터베이스
+# ===================================
+*.db
+*.sqlite
+*.sqlite3
+
+# ===================================
+# Jupyter Notebook
+# ===================================
+.ipynb_checkpoints/
+*.ipynb
+
+# ===================================
 # 기타
 # ===================================
 *.pid
 *.seed
 *.pid.lock
 volumes/
+.pytest_cache/
+.coverage
+htmlcov/

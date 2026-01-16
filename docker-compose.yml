@@ -5,6 +5,8 @@ services:
     ports:
       - "80:80"
       - "443:443"
+    environment:
+      TZ: Asia/Seoul
     volumes:
       - ./nginx/html:/usr/share/nginx/html
       - ./nginx/conf.d:/etc/nginx/conf.d
@@ -21,11 +23,20 @@ services:
       - "5000:5000"
     volumes:
       - ./api:/app
+    environment:
+      TZ: Asia/Seoul
+      MINIO_ENDPOINT: ${MINIO_ENDPOINT:-fileserver:9000}
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin123}
+      MINIO_BUCKET: ${MINIO_BUCKET:-music-tracks}
+      MAX_FILE_SIZE_MB: ${MAX_FILE_SIZE_MB:-50}
     restart: unless-stopped
     networks:
       - my-pitch-network
     stdin_open: true
     tty: true
+    depends_on:
+      - fileserver
 
   fileserver:
     image: minio/minio:latest
@@ -36,6 +47,7 @@ services:
     environment:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      TZ: Asia/Seoul
     volumes:
       - ./fileserver/data:/data
     command: server /data --console-address ":9001"
