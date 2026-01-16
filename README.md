@@ -18,8 +18,6 @@ docker-compose up -d
 ## API 엔드포인트
 
 - `POST /v1/tracks/analyze` - 음악 파일 업로드 및 분석
-- `GET /v1/about` - 서비스 정보
-- `GET /v1/licenses` - 오픈소스 라이선스 정보
 
 ## 라이선스
 
