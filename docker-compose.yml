@@ -28,8 +28,10 @@ services:
       MINIO_ENDPOINT: ${MINIO_ENDPOINT:-fileserver:9000}
       MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin123}
-      MINIO_BUCKET: ${MINIO_BUCKET:-music-tracks}
+      ORIGINAL_BUCKET: ${ORIGINAL_BUCKET:-original-tracks}
+      SEPARATED_BUCKET: ${SEPARATED_BUCKET:-separated-tracks}
       MAX_FILE_SIZE_MB: ${MAX_FILE_SIZE_MB:-50}
+      ANALYSIS_SERVER_URL: ${ANALYSIS_SERVER_URL:-https://af52acc4c16156.lhr.life}
     restart: unless-stopped
     networks:
       - my-pitch-network
