@@ -1,8 +1,6 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
-from werkzeug.utils import secure_filename
 import os
-import re
 import uuid
 import requests
 from datetime import datetime
@@ -57,8 +55,7 @@ def validate_uploaded_file(file_key='music_file'):
     # 파일 존재 확인
     if file_key not in request.files:
         return (jsonify({
-            'error': '음악 파일이 없습니다',
-            'status': 'error'
+            'message': '음악 파일이 없습니다',
         }), 400)
     
     file = request.files[file_key]
@@ -66,15 +63,13 @@ def validate_uploaded_file(file_key='music_file'):
     # 파일명 확인
     if file.filename == '':
         return (jsonify({
-            'error': '파일이 선택되지 않았습니다',
-            'status': 'error'
+            'message': '파일이 선택되지 않았습니다',
         }), 400)
     
     # 파일 형식 확인
     if not allowed_file(file.filename):
         return (jsonify({
-            'error': '허용되지 않는 파일 형식입니다',
-            'status': 'error'
+            'message': '허용되지 않는 파일 형식입니다',
         }), 400)
     
     # 유효성 검사 통과
@@ -88,23 +83,11 @@ def hello_world():
     })
 
 def save_uploaded_file(file):
-    # 안전한 파일명 생성 (UUID + 타임스탬프)
-    original_filename = secure_filename(file.filename)
-    name, ext = os.path.splitext(original_filename)
-    
-    # 특수문자/공백 제거 (영숫자와 한글만 남김)
-    name = re.sub(r'[^a-zA-Z0-9가-힣]', '', name)
-    
-    # 파일명이 비어있거나 너무 긴 경우 처리
-    if not name or len(name) == 0:
-        name = "audio_file"
-    elif len(name) > 50:
-        name = name[:50]
-    
-    # UUID와 타임스탬프로 고유한 파일명 생성
+    # timestamp + UUID로 고유한 파일명 생성
+    ext = os.path.splitext(file.filename)[1].lower()
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
     unique_id = str(uuid.uuid4())[:8]  # UUID의 앞 8자리만 사용
-    unique_filename = f"{name}_{timestamp}_{unique_id}{ext}"
+    unique_filename = f"{timestamp}_{unique_id}{ext}"
     
     # 파일을 메모리에서 읽어 MinIO에 업로드
     file_data = file.read()
@@ -123,7 +106,7 @@ def save_uploaded_file(file):
     filename_without_ext = os.path.splitext(unique_filename)[0]
 
     return {
-        'original_filename': original_filename,
+        'unique_filename': unique_filename,
         'separated_folder': filename_without_ext,
         'file_data': file_data,  # 다른 서버로 전송하기 위해 추가
         'content_type': file.content_type or 'application/octet-stream'
@@ -229,7 +212,7 @@ def analyze_track():
         try:
             analysis_result = send_file_to_analysis_server(
                 file_info['file_data'],
-                file_info['original_filename'],
+                file_info['unique_filename'],
                 file_info['content_type']
             )
             
