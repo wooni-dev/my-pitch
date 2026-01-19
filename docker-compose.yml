@@ -5,14 +5,33 @@ services:
     ports:
       - "80:80"
       - "443:443"
-    environment:
-      TZ: Asia/Seoul
+    env_file:
+      - .env  # 루트의 .env 파일 사용
     volumes:
       - ./nginx/html:/usr/share/nginx/html
       - ./nginx/conf.d:/etc/nginx/conf.d
     restart: unless-stopped
     networks:
       - my-pitch-network
+
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: my-pitch-client
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./client:/app
+      - /app/node_modules  # 컨테이너 내부 node_modules 사용
+      - /app/.next         # 컨테이너 내부 .next 사용
+    env_file:
+      - .env  # 루트의 .env 파일 사용
+    restart: unless-stopped
+    networks:
+      - my-pitch-network
+    stdin_open: true
+    tty: true
 
   api:
     build:
@@ -23,15 +42,8 @@ services:
       - "5000:5000"
     volumes:
       - ./api:/app
-    environment:
-      TZ: Asia/Seoul
-      MINIO_ENDPOINT: ${MINIO_ENDPOINT:-fileserver:9000}
-      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
-      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin123}
-      ORIGINAL_BUCKET: ${ORIGINAL_BUCKET:-original-tracks}
-      SEPARATED_BUCKET: ${SEPARATED_BUCKET:-separated-tracks}
-      MAX_FILE_SIZE_MB: ${MAX_FILE_SIZE_MB:-50}
-      ANALYSIS_SERVER_URL: ${ANALYSIS_SERVER_URL:-https://af52acc4c16156.lhr.life}
+    env_file:
+      - .env  # 루트의 .env 파일 사용
     restart: unless-stopped
     networks:
       - my-pitch-network
@@ -46,10 +58,8 @@ services:
     ports:
       - "9000:9000"  # API 포트
       - "9001:9001"  # 웹 UI 포트
-    environment:
-      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
-      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
-      TZ: Asia/Seoul
+    env_file:
+      - .env  # 루트의 .env 파일 사용
     volumes:
       - ./fileserver/data:/data
     command: server /data --console-address ":9001"

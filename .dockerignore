@@ -1,203 +1,39 @@
 # ===================================
-# Git
+# 루트 .dockerignore (예비용)
 # ===================================
+# 현재 모든 서비스는 각자의 폴더를 context로 사용하므로
+# 이 파일은 실제로 사용되지 않습니다.
+# 
+# - client: context: ./client → client/.dockerignore 사용
+# - api: context: ./api → api/.dockerignore 사용
+#
+# 향후 루트를 context로 사용하는 서비스 추가 시를 위한
+# 기본 공통 규칙만 포함합니다.
+# ===================================
+
+# Git
 .git
 .gitignore
 .gitattributes
-.github/
 
-# ===================================
-# 문서 및 가이드
-# ===================================
-README.md
-*.md
-!LICENSES.md
-DOCKER_GUIDE.md
-DOCKER_SETUP.md
-LICENSE
-CHANGELOG.md
-docs/
-
-# ===================================
-# Docker 관련 파일
-# ===================================
-docker-compose.yml
-docker-compose.*.yml
-Dockerfile
-.dockerignore
+# Docker 관련
+docker-compose*.yml
 *.dockerfile
-.docker/
-*.docker.tar
-docker-compose.*.override.yml
 
-# ===================================
-# 프로젝트별 제외 항목
-# ===================================
-# Nginx 설정 및 파일 (API 컨테이너에 불필요)
-nginx/
-# 파일서버 데이터 (API 컨테이너에 불필요)
-fileserver/
-# 다른 서비스 디렉토리 (각 컨테이너는 자신의 것만 필요)
-api/venv/
-api/__pycache__/
-api/*.pyc
-api/LOCAL_DEV_SETUP.md
-
-# 음악 파일 (테스트용 제외)
-*.mp3
-*.wav
-*.flac
-*.m4a
-*.ogg
-*.aac
-
-# ===================================
-# Node.js
-# ===================================
-node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-package-lock.json
-yarn.lock
-.npm/
-.yarn/
-
-# ===================================
-# Python 가상환경 (로컬 개발용, 컨테이너에 포함 안됨)
-# ===================================
-venv/
-.venv/
-env/
-ENV/
-.python-version
-.pyenv/
-Pipfile.lock
-
-# ===================================
-# Python 캐시 및 빌드
-# ===================================
-__pycache__/
-*.py[cod]
-*.pyo
-*.pyd
-*$py.class
-*.so
-.Python
-*.egg-info/
-*.egg
-dist/
-build/
-pip-log.txt
-.mypy_cache/
-.dmypy.json
-*.whl
-.ruff_cache/
-.pytest_cache/
-__pypackages__/
-
-# ===================================
-# IDE & 에디터 설정
-# ===================================
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-.project
-.classpath
-.settings/
-*.sublime-project
-*.sublime-workspace
-
-# ===================================
-# 환경 변수 (실제 환경 변수만 제외, .env.example은 포함)
-# ===================================
+# 환경 변수
 .env
 .env.local
 .env.*.local
-.env.development.local
-.env.test.local
-.env.production.local
 
-# ===================================
-# 로그 파일
-# ===================================
-*.log
-logs/
-log/
-*.log.*
+# 문서
+README.md
+*.md
 
-# ===================================
-# 테스트 & 커버리지
-# ===================================
-.pytest_cache/
-.coverage
-.coverage.*
-htmlcov/
-.tox/
-coverage.xml
-*.cover
-.hypothesis/
-test-results/
-.nyc_output/
-
-# ===================================
 # OS 파일
-# ===================================
 .DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
 Thumbs.db
 Desktop.ini
-$RECYCLE.BIN/
 
-# ===================================
-# SSL/TLS 인증서
-# ===================================
-*.pem
-*.key
-*.crt
-*.csr
-*.cer
-*.p12
-*.pfx
-
-# ===================================
-# 임시 & 백업 파일
-# ===================================
+# 임시 파일
 *.tmp
-*.temp
-*.bak
-*.backup
-*.old
-*.orig
-*~
-.cache/
-
-# ===================================
-# 데이터베이스
-# ===================================
-*.db
-*.sqlite
-*.sqlite3
-
-# ===================================
-# Jupyter Notebook
-# ===================================
-.ipynb_checkpoints/
-*.ipynb
-
-# ===================================
-# 기타
-# ===================================
-*.pid
-*.seed
-*.pid.lock
-volumes/
-.pytest_cache/
-.coverage
-htmlcov/
+*.log

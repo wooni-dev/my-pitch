@@ -1,0 +1,43 @@
+{
+  "clef": "bass",
+  "timeSignature": "C",
+  "notes": [
+    {
+      "keys": ["f/2"],
+      "duration": "8"
+    },
+    {
+      "keys": ["f/2"],
+      "duration": "16"
+    },
+    {
+      "keys": ["f/2"],
+      "duration": "16"
+    },
+    {
+      "keys": ["f/2"],
+      "duration": "8"
+    },
+    {
+      "keys": ["e/2"],
+      "duration": "16"
+    },
+    {
+      "keys": ["e/2"],
+      "duration": "16"
+    },
+    {
+      "keys": ["e/2"],
+      "duration": "4"
+    },
+    {
+      "keys": ["b/2"],
+      "duration": "8r"
+    },
+    {
+      "keys": ["e/2"],
+      "duration": "16"
+    }
+  ]
+}
+

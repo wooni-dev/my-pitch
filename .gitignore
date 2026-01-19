@@ -35,8 +35,25 @@ node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-package-lock.json
-yarn.lock
+.pnpm-debug.log*
+lerna-debug.log*
+
+# Next.js
+.next/
+out/
+dist/
+build/
+.vercel
+.turbo
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+
+# 의존성 잠금 파일 (선택적 - 팀 정책에 따라)
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml
 
 # ===================================
 # Environment variables
@@ -48,6 +65,11 @@ yarn.lock
 .env.test.local
 .env.production.local
 !.env.example
+
+# 클라이언트 환경 변수 파일들
+client/.env
+client/.env.local
+client/.env.*.local
 
 # ===================================
 # IDE & Editor
@@ -86,6 +108,9 @@ volumes/
 *.docker.tar
 docker-compose.*.override.yml
 
+# Docker 볼륨 데이터
+.docker-volumes/
+
 # ===================================
 # Nginx
 # ===================================
@@ -113,6 +138,12 @@ fileserver/data/*
 !fileserver/data/.gitkeep
 .minio.sys/
 *.minio.sys
+
+# 업로드된 실제 파일들 (음악 파일)
+fileserver/data/original-tracks/*
+fileserver/data/separated-tracks/*
+!fileserver/data/original-tracks/.gitkeep
+!fileserver/data/separated-tracks/.gitkeep
 
 # ===================================
 # Logs
@@ -163,6 +194,18 @@ test-results/
 .pytest_cache/
 .ruff_cache/
 .ipynb_checkpoints/
+
+# ESLint 캐시
+.eslintcache
+
+# Stylelint 캐시
+.stylelintcache
+
+# Next.js 캐시
+.next/cache/
+
+# Vercel
+.vercel
 
 # ===================================
 # 음악 파일 (테스트용)

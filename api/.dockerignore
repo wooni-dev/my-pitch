@@ -1,0 +1,78 @@
+# Python 가상환경
+venv/
+.venv/
+env/
+ENV/
+.python-version
+
+# Python 캐시 및 빌드
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*$py.class
+*.so
+.Python
+*.egg-info/
+*.egg
+dist/
+build/
+pip-log.txt
+
+# 테스트 및 커버리지
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.hypothesis/
+
+# 환경 변수
+.env
+.env.local
+.env.*.local
+
+# 로그
+*.log
+logs/
+
+# IDE 설정
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS 파일
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+
+# Docker 관련
+Dockerfile
+.dockerignore
+docker-compose.yml
+
+# 문서
+README.md
+*.md
+LOCAL_DEV_SETUP.md
+
+# 임시 파일
+*.tmp
+*.temp
+*.bak
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb
+
+# 음악 파일 (큰 파일 제외)
+*.mp3
+*.wav
+*.flac
+*.m4a
+*.ogg
+
