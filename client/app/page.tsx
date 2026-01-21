@@ -3,7 +3,7 @@
 import { useState, useRef, DragEvent, ChangeEvent } from "react";
 import { useRouter } from "next/navigation";
 
-const API_BASE_URL = "https://melinda-subtemperate-grace.ngrok-free.dev";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://api.my-pitch";
 
 export default function Home() {
   const router = useRouter();
@@ -70,29 +70,33 @@ export default function Home() {
 
     setIsUploading(true);
     setUploadStatus("idle");
+    setErrorMessage("");
 
     try {
       const formData = new FormData();
       formData.append("music_file", selectedFile);
 
-      const response = await fetch(`${API_BASE_URL}/upload_music`, {
+      const response = await fetch(`${API_BASE_URL}/v1/tracks/analyze`, {
         method: "POST",
         body: formData,
       });
 
       if (response.ok) {
-        setUploadStatus("success");
-        setSelectedFile(null);
-        if (fileInputRef.current) {
-          fileInputRef.current.value = "";
-        }
-        // 업로드 성공 후 sheet-music 페이지로 리다이렉트
+        const data = await response.json();
+        
+        // sessionStorage에 임시 저장 (브라우저 탭 닫으면 자동 삭제됨)
+        sessionStorage.setItem('sheetMusicData', JSON.stringify(data));
+        
+        // 업로드 성공 후 즉시 sheet-music 페이지로 리다이렉트
         router.push("/sheet-music");
       } else {
+        const errorData = await response.json().catch(() => ({}));
+        setErrorMessage(errorData.message || "업로드에 실패했습니다.");
         setUploadStatus("error");
       }
     } catch (error) {
       console.error("Upload error:", error);
+      setErrorMessage("서버와 통신 중 오류가 발생했습니다.");
       setUploadStatus("error");
     } finally {
       setIsUploading(false);

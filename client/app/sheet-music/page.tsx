@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { Renderer, Stave, StaveNote, Voice, Formatter, Accidental } from "vexflow";
 import fallbackSheetMusicData from "../../api.json";
 
@@ -16,7 +16,6 @@ const SHEET_MUSIC_LAYOUT = {
 
 export default function SheetMusicPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   
   // 데이터 상태
   const [isLoading, setIsLoading] = useState(true);
@@ -33,45 +32,63 @@ export default function SheetMusicPage() {
   const containerRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   
-  const trackName = searchParams.get('track') || 'default_track';
+  // sessionStorage를 사용하여 새로고침 시에도 데이터 유지 (브라우저 탭 닫으면 자동 삭제)
+  const [dataLoaded, setDataLoaded] = useState(false);
 
   // API 데이터 가져오기
   useEffect(() => {
-    const fetchSheetMusic = async () => {
-      setSheetMusicData(fallbackSheetMusicData);
-      setIsLoading(false);
-      
-      // 실제 API 호출 시 아래 주석 해제
-      // try {
-      //   setIsLoading(true);
-      //   const response = await fetch(`YOUR_API_URL/v1/tracks/analyze`, {
-      //     method: 'POST',
-      //     body: formData
-      //   });
-      //   
-      //   if (!response.ok) {
-      //     throw new Error('악보 데이터를 불러오는데 실패했습니다');
-      //   }
-      //   
-      //   const data = await response.json();
-      //   setSheetMusicData(data);
-      //   setError(null);
-      // } catch (err) {
-      //   console.error('API 호출 오류:', err);
-      //   setError('데이터를 불러오는데 실패했습니다');
-      // } finally {
-      //   setIsLoading(false);
-      // }
+    if (dataLoaded) return;
+    
+    const loadSheetMusic = () => {
+      try {
+        setIsLoading(true);
+        
+        // sessionStorage에서 데이터 가져오기 (브라우저 탭 닫으면 자동 삭제됨)
+        const storedData = sessionStorage.getItem('sheetMusicData');
+        
+        if (storedData) {
+          const apiResponse = JSON.parse(storedData);
+          
+          // API 응답 사용
+          if (apiResponse) {
+            setSheetMusicData(apiResponse);
+            setError(null);
+            setDataLoaded(true);
+            
+            // sessionStorage 유지 (새로고침 시에도 데이터 보존, 탭 닫으면 자동 삭제)
+          } else {
+            throw new Error('데이터가 없습니다');
+          }
+        } else {
+          // 저장된 데이터가 없으면 fallback 데이터 사용
+          console.warn('저장된 데이터가 없습니다. Fallback 데이터를 사용합니다.');
+          setSheetMusicData(fallbackSheetMusicData);
+          setDataLoaded(true);
+        }
+      } catch (err) {
+        console.error('데이터 로드 오류:', err);
+        setError('데이터를 불러오는데 실패했습니다');
+        // 에러 발생 시에도 fallback 데이터 사용
+        setSheetMusicData(fallbackSheetMusicData);
+        setDataLoaded(true);
+      } finally {
+        setIsLoading(false);
+      }
     };
 
-    fetchSheetMusic();
-  }, [trackName]);
+    loadSheetMusic();
+  }, [dataLoaded]);
 
   // 오디오 플레이어 초기화
   useEffect(() => {
-    if (!sheetMusicData?.file_url) return;
+    if (!sheetMusicData?.file_url) {
+      console.warn('file_url이 없습니다:', sheetMusicData);
+      return;
+    }
 
-    const audio = new Audio(`${process.env.NEXT_PUBLIC_API_URL}${sheetMusicData.file_url}`);
+    console.log('오디오 URL:', sheetMusicData.file_url);
+    
+    const audio = new Audio();
     audioRef.current = audio;
 
     let animationFrameId: number;
@@ -101,14 +118,32 @@ export default function SheetMusicPage() {
       }
     };
 
+    const handleError = (e: Event) => {
+      console.error('오디오 로드 에러:', e);
+      console.error('오디오 에러 상세:', audio.error);
+      setError(`오디오 파일을 로드할 수 없습니다: ${audio.error?.message || '알 수 없는 오류'}`);
+    };
+
+    const handleCanPlay = () => {
+      console.log('오디오 로드 성공');
+    };
+
     audio.addEventListener('play', handlePlay);
     audio.addEventListener('pause', handlePause);
     audio.addEventListener('ended', handleEnded);
+    audio.addEventListener('error', handleError);
+    audio.addEventListener('canplay', handleCanPlay);
+
+    // src 설정은 이벤트 리스너 추가 후에
+    audio.src = sheetMusicData.file_url;
+    audio.load();
 
     return () => {
       audio.removeEventListener('play', handlePlay);
       audio.removeEventListener('pause', handlePause);
       audio.removeEventListener('ended', handleEnded);
+      audio.removeEventListener('error', handleError);
+      audio.removeEventListener('canplay', handleCanPlay);
       if (animationFrameId) {
         cancelAnimationFrame(animationFrameId);
       }
@@ -152,19 +187,14 @@ export default function SheetMusicPage() {
     const staveStart = 10;
     const clefAndTimeWidth = 100;
     const notePosition = staveStart + clefAndTimeWidth + SHEET_MUSIC_LAYOUT.START_MARGIN + currentNoteIndex * SHEET_MUSIC_LAYOUT.NOTE_WIDTH;
-    console.log('notePosition', notePosition);
+
     // 현재 스크롤 위치와 보이는 영역
     const scrollLeft = container.scrollLeft;
     const containerWidth = container.clientWidth;
     const visibleEnd = scrollLeft + containerWidth;
-    console.log({
-      'scrollLeft': scrollLeft,
-      'containerWidth': containerWidth,
-      'visibleEnd': visibleEnd,
-    });    
+
     // 음표의 끝 위치
     const noteEnd = notePosition + SHEET_MUSIC_LAYOUT.NOTE_WIDTH;
-    console.log('noteEnd', noteEnd);
     
     // 음표가 화면 오른쪽을 벗어났는지 확인
     if (noteEnd > visibleEnd - SHEET_MUSIC_LAYOUT.SCROLL_PADDING) {
@@ -414,7 +444,11 @@ export default function SheetMusicPage() {
               홈으로 돌아가기
             </button>
             <button
-              onClick={() => router.push("/")}
+              onClick={() => {
+                // sessionStorage 데이터 정리 (이미 로드 시 삭제됐지만 혹시 모를 경우 대비)
+                sessionStorage.removeItem('sheetMusicData');
+                router.push("/");
+              }}
               className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] sm:w-auto sm:flex-1"
             >
               새 파일 업로드

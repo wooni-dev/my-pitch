@@ -2,9 +2,11 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 from minio import Minio
 from minio.error import S3Error
+import json
 
 from config import (
     MINIO_ENDPOINT,
+    MINIO_PUBLIC_ENDPOINT,
     MINIO_ACCESS_KEY,
     MINIO_SECRET_KEY,
     ORIGINAL_BUCKET,
@@ -18,6 +20,7 @@ from services import (
     analyze_vocal_pitch_from_minio,
     download_and_save_separated_files
 )
+from utils import determine_clef
 
 app = Flask(__name__)
 CORS(app)
@@ -34,10 +37,11 @@ minio_client = Minio(
     secure=False  # HTTP 사용 (개발 환경)
 )
 
-# 버킷 생성 (없으면)
+# 버킷 생성 및 public read 권한 설정
 buckets = [ORIGINAL_BUCKET, SEPARATED_BUCKET]
 for bucket_name in buckets:
     try:
+        # 버킷이 없으면 생성
         if not minio_client.bucket_exists(bucket_name):
             minio_client.make_bucket(bucket_name)
             print(f"버킷 '{bucket_name}' 생성 완료")
@@ -81,12 +85,14 @@ def analyze_track():
             if saved_files.get('vocal_object_name'):
                 pitch_data = analyze_vocal_pitch_from_minio(saved_files['vocal_object_name'], minio_client)
 
-            # 응답 데이터 구성
+            # 6. 클레프 결정
+            clef = determine_clef(pitch_data)
+
+            # 7. 응답 데이터 구성
             response_data = {
-                'message': '파일이 성공적으로 업로드되고 분리되었습니다',
-                'vocal_url': saved_files.get('vocal_minio_url'),
-                'mr_url': saved_files.get('mr_minio_url'),
-                'pitch_data': pitch_data
+                'clef': clef,
+                'file_url': f"{MINIO_PUBLIC_ENDPOINT}/{ORIGINAL_BUCKET}/{file_info['unique_filename']}",
+                'notes': pitch_data
             }
             
             return jsonify(response_data), 200

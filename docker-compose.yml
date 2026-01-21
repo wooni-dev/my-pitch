@@ -5,11 +5,11 @@ services:
     ports:
       - "80:80"
       - "443:443"
-    env_file:
-      - .env  # 루트의 .env 파일 사용
     volumes:
       - ./nginx/html:/usr/share/nginx/html
       - ./nginx/conf.d:/etc/nginx/conf.d
+    environment:
+      - TZ=Asia/Seoul
     restart: unless-stopped
     networks:
       - my-pitch-network
@@ -25,13 +25,17 @@ services:
       - ./client:/app
       - /app/node_modules  # 컨테이너 내부 node_modules 사용
       - /app/.next         # 컨테이너 내부 .next 사용
-    env_file:
-      - .env  # 루트의 .env 파일 사용
+    environment:
+      # API URL (.env에서 변경 가능, 기본값: Docker 네트워크 내부 주소)
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://my-pitch-api:5000}
+      - TZ=Asia/Seoul
     restart: unless-stopped
     networks:
       - my-pitch-network
     stdin_open: true
     tty: true
+    depends_on:
+      - api
 
   api:
     build:
@@ -42,8 +46,20 @@ services:
       - "5000:5000"
     volumes:
       - ./api:/app
-    env_file:
-      - .env  # 루트의 .env 파일 사용
+    environment:
+      # MinIO 설정 (.env 파일에서 값 로드, 없으면 기본값 사용)
+      - MINIO_ENDPOINT=${MINIO_ENDPOINT:-fileserver:9000}
+      - MINIO_PUBLIC_ENDPOINT=${MINIO_PUBLIC_ENDPOINT:-http://files.my-pitch}
+      - MINIO_ROOT_USER=${MINIO_ROOT_USER:-minioadmin}
+      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD:-minioadmin}
+      # 버킷 설정
+      - ORIGINAL_BUCKET=${ORIGINAL_BUCKET:-original-tracks}
+      - SEPARATED_BUCKET=${SEPARATED_BUCKET:-separated-tracks}
+      # 파일 업로드 설정
+      - MAX_FILE_SIZE_MB=${MAX_FILE_SIZE_MB:-100}
+      # 외부 분석 서버 (ngrok 주소 - .env에서 변경 가능)
+      - ANALYSIS_SERVER_URL=${ANALYSIS_SERVER_URL:-https://melinda-subtemperate-grace.ngrok-free.dev}
+      - TZ=Asia/Seoul
     restart: unless-stopped
     networks:
       - my-pitch-network
@@ -58,8 +74,11 @@ services:
     ports:
       - "9000:9000"  # API 포트
       - "9001:9001"  # 웹 UI 포트
-    env_file:
-      - .env  # 루트의 .env 파일 사용
+    environment:
+      # MinIO 관리자 계정 (.env에서 변경 가능, 기본값: minioadmin)
+      - MINIO_ROOT_USER=${MINIO_ROOT_USER:-minioadmin}
+      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD:-minioadmin}
+      - TZ=Asia/Seoul
     volumes:
       - ./fileserver/data:/data
     command: server /data --console-address ":9001"

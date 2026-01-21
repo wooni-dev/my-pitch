@@ -6,7 +6,7 @@ from io import BytesIO
 from minio import Minio
 
 from config import (
-    MINIO_ENDPOINT,
+    MINIO_PUBLIC_ENDPOINT,
     ANALYSIS_SERVER_URL,
     SEPARATED_BUCKET
 )
@@ -180,7 +180,7 @@ def download_and_save_separated_files(analysis_result: dict, separated_folder: s
             content_type='audio/wav'
         )
         
-        saved_files['vocal_minio_url'] = f"http://{MINIO_ENDPOINT}/{SEPARATED_BUCKET}/{vocal_object_name}"
+        saved_files['vocal_minio_url'] = f"{MINIO_PUBLIC_ENDPOINT}/{SEPARATED_BUCKET}/{vocal_object_name}"
         saved_files['vocal_object_name'] = vocal_object_name  # 피치 분석을 위해 저장
     
     # mr 파일 다운로드 및 저장
@@ -203,7 +203,7 @@ def download_and_save_separated_files(analysis_result: dict, separated_folder: s
             content_type='audio/wav'
         )
         
-        saved_files['mr_minio_url'] = f"http://{MINIO_ENDPOINT}/{SEPARATED_BUCKET}/{mr_object_name}"
+        saved_files['mr_minio_url'] = f"{MINIO_PUBLIC_ENDPOINT}/{SEPARATED_BUCKET}/{mr_object_name}"
     
     return saved_files
 

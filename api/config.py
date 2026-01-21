@@ -1,7 +1,8 @@
 import os
 
 # MinIO 설정
-MINIO_ENDPOINT = os.environ.get('MINIO_ENDPOINT', 'fileserver:9000')
+MINIO_ENDPOINT = os.environ.get('MINIO_ENDPOINT', 'fileserver:9000')  # 서버 내부 연결용
+MINIO_PUBLIC_ENDPOINT = os.environ.get('MINIO_PUBLIC_ENDPOINT', 'http://files.my-pitch')  # 브라우저 다운로드용
 MINIO_ACCESS_KEY = os.environ.get('MINIO_ROOT_USER', 'minioadmin')
 MINIO_SECRET_KEY = os.environ.get('MINIO_ROOT_PASSWORD', 'minioadmin')
 

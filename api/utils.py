@@ -104,3 +104,35 @@ def extract_pitch_info(vocal_file_path: str):
 
     return notes_data
 
+
+def determine_clef(notes_data):
+    """
+    음정 데이터를 기반으로 악보의 음자리표(clef)를 결정
+    
+    Args:
+        notes_data: 음정 정보 리스트 [{"note": "C4", ...}, ...]
+    
+    Returns:
+        str: 'treble' (높은음자리표) 또는 'bass' (낮은음자리표)
+    """
+    if not notes_data:
+        # 음정 데이터가 없으면 기본값으로 treble 반환
+        return 'treble'
+
+    # 모든 노트의 주파수를 수집
+    frequencies = []
+    for note in notes_data:
+        note_name = note['note']
+        # 음표 이름을 주파수로 변환
+        frequency = librosa.note_to_hz(note_name)
+        frequencies.append(frequency)
+
+    # 평균 주파수 계산
+    avg_frequency = np.mean(frequencies)
+
+    # 기준 주파수: 약 260Hz (C4 근처)
+    # 평균 주파수가 260Hz 이상이면 여성(treble), 미만이면 남성(bass)
+    if avg_frequency >= 260:
+        return 'treble'
+    else:
+        return 'bass'
