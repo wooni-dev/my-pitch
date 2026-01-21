@@ -12,6 +12,7 @@ export default function Home() {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadStatus, setUploadStatus] = useState<"idle" | "success" | "error">("idle");
   const [errorMessage, setErrorMessage] = useState<string>("");
+  const [vocalType, setVocalType] = useState<"female" | "male">("female");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const audioFileExtensions = [".mp3", ".wav", ".flac", ".m4a", ".aac", ".ogg", ".wma", ".opus"];
@@ -75,6 +76,7 @@ export default function Home() {
     try {
       const formData = new FormData();
       formData.append("music_file", selectedFile);
+      formData.append("vocal_type", vocalType);
 
       const response = await fetch(`${API_BASE_URL}/v1/tracks/analyze`, {
         method: "POST",
@@ -204,6 +206,42 @@ export default function Home() {
                     />
                   </svg>
                 </button>
+              </div>
+            </div>
+          )}
+
+          {selectedFile && (
+            <div className="bg-zinc-50 dark:bg-zinc-900 rounded-lg p-6 border border-zinc-200 dark:border-zinc-800">
+              <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100 mb-4">
+                노래 음역대 선택
+              </p>
+              <div className="flex gap-4">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="vocalType"
+                    value="female"
+                    checked={vocalType === "female"}
+                    onChange={(e) => setVocalType(e.target.value as "female" | "male")}
+                    className="w-4 h-4 text-blue-600 cursor-pointer"
+                  />
+                  <span className="text-sm text-zinc-700 dark:text-zinc-300">
+                    여자 노래 (높은 음역대)
+                  </span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="vocalType"
+                    value="male"
+                    checked={vocalType === "male"}
+                    onChange={(e) => setVocalType(e.target.value as "female" | "male")}
+                    className="w-4 h-4 text-blue-600 cursor-pointer"
+                  />
+                  <span className="text-sm text-zinc-700 dark:text-zinc-300">
+                    남자 노래 (낮은 음역대)
+                  </span>
+                </label>
               </div>
             </div>
           )}

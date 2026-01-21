@@ -45,7 +45,11 @@ export default function SheetMusicPage() {
         
         // sessionStorage에서 데이터 가져오기 (브라우저 탭 닫으면 자동 삭제됨)
         const storedData = sessionStorage.getItem('sheetMusicData');
-        
+
+        // console.warn('저장된 데이터가 없습니다. Fallback 데이터를 사용합니다.');
+        // setSheetMusicData(fallbackSheetMusicData);
+        // setDataLoaded(true);
+
         if (storedData) {
           const apiResponse = JSON.parse(storedData);
           
@@ -260,8 +264,8 @@ export default function SheetMusicPage() {
     const staveX = 10;
     const staveWidth = canvasWidth - staveX - 10;
     const stave = new VF.Stave(staveX, 40, staveWidth);
-    const clef = sheetMusicData.clef || 'treble'; // API에서 받은 clef 값 사용 (기본값: treble)
-    stave.addClef(clef).addTimeSignature('4/4');
+    // bass clef도 treble로 표시 (음표는 이미 한 옥타브 올라가 있음)
+    stave.addClef('treble').addTimeSignature('4/4');
     stave.setContext(context).draw();
 
     // 모든 음표 생성

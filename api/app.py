@@ -1,4 +1,4 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from flask_cors import CORS
 from minio.error import S3Error
 
@@ -39,6 +39,9 @@ def analyze_track():
     if error:
         return file  # error가 있으면 file에 error response가 들어있음
     
+    # 1-1. vocal_type 파라미터 받기 (기본값: female)
+    vocal_type = request.form.get('vocal_type', 'female')
+    
     # 2. 파일 저장
     try:
         file_info = save_uploaded_file(file, minio_client, ORIGINAL_BUCKET)
@@ -63,8 +66,9 @@ def analyze_track():
             if saved_files.get('vocal_object_name'):
                 pitch_data = analyze_vocal_pitch_from_minio(saved_files['vocal_object_name'], minio_client)
 
-            # 6. 클레프 결정
-            clef = determine_clef(pitch_data)
+            # 6. 클레프 결정 (사용자가 선택한 vocal_type 기반)
+            # female → treble, male → bass
+            clef = 'treble' if vocal_type == 'female' else 'bass'
 
             # 7. 응답 데이터 구성
             response_data = {
