@@ -1,16 +1,10 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify
 from flask_cors import CORS
-from minio import Minio
 from minio.error import S3Error
-import json
 
 from config import (
-    MINIO_ENDPOINT,
     MINIO_PUBLIC_ENDPOINT,
-    MINIO_ACCESS_KEY,
-    MINIO_SECRET_KEY,
     ORIGINAL_BUCKET,
-    SEPARATED_BUCKET,
     MAX_FILE_SIZE_MB
 )
 from validators import validate_uploaded_file
@@ -21,6 +15,7 @@ from services import (
     download_and_save_separated_files
 )
 from utils import determine_clef
+from storage import setup_storage
 
 app = Flask(__name__)
 CORS(app)
@@ -28,25 +23,8 @@ CORS(app)
 # Flask 설정
 app.config['MAX_CONTENT_LENGTH'] = MAX_FILE_SIZE_MB * 1024 * 1024
 
-# MinIO 클라이언트 초기화
-# https://docs.min.io/enterprise/aistor-object-store/developers/sdk/python/api/#1-constructor
-minio_client = Minio(
-    MINIO_ENDPOINT,
-    access_key=MINIO_ACCESS_KEY,
-    secret_key=MINIO_SECRET_KEY,
-    secure=False  # HTTP 사용 (개발 환경)
-)
-
-# 버킷 생성 및 public read 권한 설정
-buckets = [ORIGINAL_BUCKET, SEPARATED_BUCKET]
-for bucket_name in buckets:
-    try:
-        # 버킷이 없으면 생성
-        if not minio_client.bucket_exists(bucket_name):
-            minio_client.make_bucket(bucket_name)
-            print(f"버킷 '{bucket_name}' 생성 완료")
-    except S3Error as e:
-        print(f"버킷 '{bucket_name}' 확인/생성 중 오류: {e}")
+# MinIO 클라이언트 초기화 (버킷 설정 포함)
+minio_client = setup_storage()
 
 @app.route('/')
 def hello_world():

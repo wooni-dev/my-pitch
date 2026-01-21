@@ -52,7 +52,7 @@ def extract_pitch_info(vocal_file_path: str):
         # 피치가 감지되지 않은 경우 (묵음 또는 노이즈)
         if (np.isnan(frequency) or
             voiced_flag[i] == False or
-            voiced_probs[i] < 0.1):
+            voiced_probs[i] < 0.5):
 
             # 이전에 처리 중이던 노트가 있다면 저장
             if current_note is not None:
