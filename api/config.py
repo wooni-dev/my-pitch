@@ -10,9 +10,9 @@ MINIO_SECRET_KEY = os.environ.get('MINIO_ROOT_PASSWORD', 'minioadmin')
 ORIGINAL_BUCKET = os.environ.get('ORIGINAL_BUCKET', 'original-tracks')  # 원본 파일 저장
 SEPARATED_BUCKET = os.environ.get('SEPARATED_BUCKET', 'separated-tracks')  # vocal, mr 분리 파일 저장
 
-# 파일 업로드 설정
-ALLOWED_EXTENSIONS = {'mp3', 'wav', 'flac', 'm4a', 'ogg', 'aac'}
-MAX_FILE_SIZE_MB = int(os.environ.get('MAX_FILE_SIZE_MB', '100'))
+# 파일 업로드 설정 (demucs 호환 형식만 지원)
+ALLOWED_EXTENSIONS = {'wav', 'mp3', 'flac', 'ogg'}
+MAX_FILE_SIZE_MB = int(os.environ.get('MAX_FILE_SIZE_MB', '30'))
 
 # 외부 API 서버 설정
 ANALYSIS_SERVER_URL = os.environ.get('ANALYSIS_SERVER_URL', 'https://6e37648a7e67ec.lhr.life')

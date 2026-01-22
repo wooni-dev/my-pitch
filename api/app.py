@@ -26,6 +26,13 @@ app.config['MAX_CONTENT_LENGTH'] = MAX_FILE_SIZE_MB * 1024 * 1024
 # MinIO 클라이언트 초기화 (버킷 설정 포함)
 minio_client = setup_storage()
 
+# 파일 크기 초과 에러 핸들러
+@app.errorhandler(413)
+def request_entity_too_large(error):
+    return jsonify({
+        'message': f'파일 크기가 {MAX_FILE_SIZE_MB}MB를 초과했습니다. 더 작은 파일을 업로드해주세요.'
+    }), 413
+
 @app.route('/')
 def hello_world():
     return jsonify({

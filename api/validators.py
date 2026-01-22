@@ -31,8 +31,9 @@ def validate_uploaded_file(file_key='music_file'):
     
     # 파일 형식 확인
     if not allowed_file(file.filename, ALLOWED_EXTENSIONS):
+        allowed_formats = ', '.join(sorted(ALLOWED_EXTENSIONS)).upper()
         return (jsonify({
-            'message': '허용되지 않는 파일 형식입니다',
+            'message': f'지원하지 않는 파일 형식입니다. 지원 형식: {allowed_formats}',
         }), 400), True
     
     # 유효성 검사 통과
