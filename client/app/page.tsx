@@ -12,7 +12,7 @@ export default function Home() {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadStatus, setUploadStatus] = useState<"idle" | "success" | "error">("idle");
   const [errorMessage, setErrorMessage] = useState<string>("");
-  const [vocalType, setVocalType] = useState<"female" | "male">("female");
+  const [vocalType, setVocalType] = useState<"female" | "male" | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const audioFileExtensions = [".mp3", ".wav", ".flac", ".m4a", ".aac", ".ogg", ".wma", ".opus"];
@@ -40,6 +40,7 @@ export default function Home() {
     if (file) {
       if (isAudioFile(file)) {
         setSelectedFile(file);
+        setVocalType(null); // 새 파일 선택 시 음역대 초기화
         setUploadStatus("idle");
         setErrorMessage("");
       } else {
@@ -54,6 +55,7 @@ export default function Home() {
     if (file) {
       if (isAudioFile(file)) {
         setSelectedFile(file);
+        setVocalType(null); // 새 파일 선택 시 음역대 초기화
         setUploadStatus("idle");
         setErrorMessage("");
       } else {
@@ -67,7 +69,7 @@ export default function Home() {
   };
 
   const handleUpload = async () => {
-    if (!selectedFile) return;
+    if (!selectedFile || !vocalType) return;
 
     setIsUploading(true);
     setUploadStatus("idle");
@@ -126,52 +128,55 @@ export default function Home() {
             </p>
           </div>
 
-          <div
-            className={`relative border-2 border-dashed rounded-xl p-12 transition-all ${
-              isDragging
-                ? "border-blue-500 bg-blue-50 dark:bg-blue-950/20"
-                : "border-zinc-300 dark:border-zinc-700 hover:border-zinc-400 dark:hover:border-zinc-600"
-            }`}
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
-            onDrop={handleDrop}
-          >
-            <input
-              ref={fileInputRef}
-              type="file"
-              className="hidden"
-              onChange={handleFileSelect}
-              accept="audio/*,.mp3,.wav,.flac,.m4a,.aac,.ogg,.wma,.opus"
-              id="file-upload"
-            />
-            <label
-              htmlFor="file-upload"
-              className="flex flex-col items-center justify-center cursor-pointer"
+          {!selectedFile && (
+            <div
+              className={`relative border-2 border-dashed rounded-xl p-12 transition-all ${
+                isDragging
+                  ? "border-blue-500 bg-blue-50 dark:bg-blue-950/20"
+                  : "border-zinc-300 dark:border-zinc-700 hover:border-zinc-400 dark:hover:border-zinc-600"
+              }`}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
             >
-              <svg
-                className="w-16 h-16 mb-4 text-zinc-400 dark:text-zinc-600"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+              <input
+                ref={fileInputRef}
+                type="file"
+                className="hidden"
+                onChange={handleFileSelect}
+                accept="audio/*,.mp3,.wav,.flac,.m4a,.aac,.ogg,.wma,.opus"
+                id="file-upload"
+              />
+              <label
+                htmlFor="file-upload"
+                className="flex flex-col items-center justify-center cursor-pointer"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"
-                />
-              </svg>
-              <p className="text-lg font-medium text-zinc-700 dark:text-zinc-300 mb-2">
-                음악 파일을 클릭하거나 드래그하여 선택
-              </p>
-              <p className="text-sm text-zinc-500 dark:text-zinc-500">
-                MP3, WAV, FLAC, M4A, AAC, OGG 등 지원
-              </p>
-            </label>
-          </div>
+                <svg
+                  className="w-16 h-16 mb-4 text-zinc-400 dark:text-zinc-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"
+                  />
+                </svg>
+                <p className="text-lg font-medium text-zinc-700 dark:text-zinc-300 mb-2">
+                  음악 파일을 클릭하거나 드래그하여 선택
+                </p>
+                <p className="text-sm text-zinc-500 dark:text-zinc-500">
+                  MP3, WAV, FLAC, M4A, AAC, OGG 등 지원
+                </p>
+              </label>
+            </div>
+          )}
 
           {selectedFile && (
-            <div className="bg-zinc-50 dark:bg-zinc-900 rounded-lg p-6 border border-zinc-200 dark:border-zinc-800">
+            <div className="bg-zinc-50 dark:bg-zinc-900 rounded-lg p-6 border border-zinc-200 dark:border-zinc-800 space-y-6">
+              {/* 파일 정보 */}
               <div className="flex items-center justify-between">
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100 truncate">
@@ -184,12 +189,13 @@ export default function Home() {
                 <button
                   onClick={() => {
                     setSelectedFile(null);
+                    setVocalType(null);
                     setUploadStatus("idle");
                     if (fileInputRef.current) {
                       fileInputRef.current.value = "";
                     }
                   }}
-                  className="ml-4 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
+                  className="ml-4 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 cursor-pointer"
                   aria-label="파일 제거"
                 >
                   <svg
@@ -207,40 +213,134 @@ export default function Home() {
                   </svg>
                 </button>
               </div>
-            </div>
-          )}
 
-          {selectedFile && (
-            <div className="bg-zinc-50 dark:bg-zinc-900 rounded-lg p-6 border border-zinc-200 dark:border-zinc-800">
-              <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100 mb-4">
-                노래 음역대 선택
-              </p>
-              <div className="flex gap-4">
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="radio"
-                    name="vocalType"
-                    value="female"
-                    checked={vocalType === "female"}
-                    onChange={(e) => setVocalType(e.target.value as "female" | "male")}
-                    className="w-4 h-4 text-blue-600 cursor-pointer"
-                  />
-                  <span className="text-sm text-zinc-700 dark:text-zinc-300">
-                    여자 노래 (높은 음역대)
-                  </span>
-                </label>
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="radio"
-                    name="vocalType"
-                    value="male"
-                    checked={vocalType === "male"}
-                    onChange={(e) => setVocalType(e.target.value as "female" | "male")}
-                    className="w-4 h-4 text-blue-600 cursor-pointer"
-                  />
-                  <span className="text-sm text-zinc-700 dark:text-zinc-300">
-                    남자 노래 (낮은 음역대)
-                  </span>
+              {/* 구분선 */}
+              <div className="border-t border-zinc-200 dark:border-zinc-800"></div>
+
+              {/* 음역대 선택 */}
+              <div>
+                <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100 mb-1">
+                  부르는 사람의 음역대
+                </p>
+                <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-4">
+                  원곡이 아닌, 실제로 녹음된 목소리를 기준으로 선택하세요
+                </p>
+                <div className="grid grid-cols-2 gap-3">
+                  <label className="relative cursor-pointer">
+                    <input
+                      type="radio"
+                      name="vocalType"
+                      value="female"
+                      checked={vocalType === "female"}
+                      onChange={(e) => setVocalType(e.target.value as "female" | "male")}
+                      className="peer sr-only"
+                    />
+                    <div className="flex items-center gap-3 px-4 py-4 bg-white dark:bg-zinc-800 border-2 border-zinc-200 dark:border-zinc-700 rounded-xl transition-all hover:border-zinc-300 dark:hover:border-zinc-600 peer-checked:border-pink-500 peer-checked:bg-pink-50 dark:peer-checked:bg-pink-950/30 peer-checked:shadow-sm">
+                      <svg
+                        className="w-5 h-5 text-zinc-400 dark:text-zinc-500 peer-checked:text-pink-500"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                        />
+                      </svg>
+                      <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300 peer-checked:text-pink-700 dark:peer-checked:text-pink-400">
+                        여성 보컬
+                      </span>
+                      {vocalType === "female" && (
+                        <svg
+                          className="w-5 h-5 text-pink-500 ml-auto"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                      )}
+                    </div>
+                  </label>
+                  <label className="relative cursor-pointer">
+                    <input
+                      type="radio"
+                      name="vocalType"
+                      value="male"
+                      checked={vocalType === "male"}
+                      onChange={(e) => setVocalType(e.target.value as "female" | "male")}
+                      className="peer sr-only"
+                    />
+                    <div className="flex items-center gap-3 px-4 py-4 bg-white dark:bg-zinc-800 border-2 border-zinc-200 dark:border-zinc-700 rounded-xl transition-all hover:border-zinc-300 dark:hover:border-zinc-600 peer-checked:border-blue-500 peer-checked:bg-blue-50 dark:peer-checked:bg-blue-950/30 peer-checked:shadow-sm">
+                      <svg
+                        className="w-5 h-5 text-zinc-400 dark:text-zinc-500 peer-checked:text-blue-500"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                        />
+                      </svg>
+                      <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300 peer-checked:text-blue-700 dark:peer-checked:text-blue-400">
+                        남성 보컬
+                      </span>
+                      {vocalType === "male" && (
+                        <svg
+                          className="w-5 h-5 text-blue-500 ml-auto"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                      )}
+                    </div>
+                  </label>
+                </div>
+              </div>
+
+              {/* 구분선 */}
+              <div className="border-t border-zinc-200 dark:border-zinc-800"></div>
+
+              {/* 다른 파일 선택 버튼 */}
+              <div>
+                <input
+                  type="file"
+                  className="hidden"
+                  onChange={handleFileSelect}
+                  accept="audio/*,.mp3,.wav,.flac,.m4a,.aac,.ogg,.wma,.opus"
+                  id="file-change"
+                />
+                <label
+                  htmlFor="file-change"
+                  className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-750 cursor-pointer transition-colors"
+                >
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"
+                    />
+                  </svg>
+                  다른 파일 선택
                 </label>
               </div>
             </div>
@@ -272,10 +372,10 @@ export default function Home() {
 
           <button
             onClick={handleUpload}
-            disabled={!selectedFile || isUploading}
+            disabled={!selectedFile || !vocalType || isUploading}
             className={`w-full h-12 rounded-full font-medium transition-colors ${
-              selectedFile && !isUploading
-                ? "bg-black text-white hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-200"
+              selectedFile && vocalType && !isUploading
+                ? "bg-black text-white hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-200 cursor-pointer"
                 : "bg-zinc-200 text-zinc-400 cursor-not-allowed dark:bg-zinc-800 dark:text-zinc-600"
             }`}
           >
