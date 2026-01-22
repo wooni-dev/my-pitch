@@ -15,11 +15,12 @@ export default function Home() {
   const [vocalType, setVocalType] = useState<"female" | "male" | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const audioFileExtensions = [".mp3", ".wav", ".flac", ".m4a", ".aac", ".ogg", ".wma", ".opus"];
+  const audioFileExtensions = [".wav", ".mp3", ".flac", ".ogg"];
   
   const isAudioFile = (file: File): boolean => {
     const fileName = file.name.toLowerCase();
-    return audioFileExtensions.some(ext => fileName.endsWith(ext)) || file.type.startsWith("audio/");
+    // 확장자만 엄격하게 체크 (MIME 타입 체크 제거)
+    return audioFileExtensions.some(ext => fileName.endsWith(ext));
   };
 
   const handleDragOver = (e: DragEvent<HTMLDivElement>) => {
@@ -44,7 +45,8 @@ export default function Home() {
         setUploadStatus("idle");
         setErrorMessage("");
       } else {
-        setErrorMessage("음악 파일만 업로드할 수 있습니다. (MP3, WAV, FLAC, M4A, AAC, OGG 등)");
+        alert(`지원하지 않는 파일 형식입니다.\n\n지원 형식: WAV, MP3, FLAC, OGG\n선택한 파일: ${file.name}`);
+        setErrorMessage("지원하지 않는 파일 형식입니다. (WAV, MP3, FLAC, OGG만 지원)");
         setSelectedFile(null);
       }
     }
@@ -59,7 +61,8 @@ export default function Home() {
         setUploadStatus("idle");
         setErrorMessage("");
       } else {
-        setErrorMessage("음악 파일만 업로드할 수 있습니다. (MP3, WAV, FLAC, M4A, AAC, OGG 등)");
+        alert(`지원하지 않는 파일 형식입니다.\n\n지원 형식: WAV, MP3, FLAC, OGG\n선택한 파일: ${file.name}`);
+        setErrorMessage("지원하지 않는 파일 형식입니다. (WAV, MP3, FLAC, OGG만 지원)");
         setSelectedFile(null);
         if (fileInputRef.current) {
           fileInputRef.current.value = "";
@@ -209,7 +212,7 @@ export default function Home() {
                 type="file"
                 className="hidden"
                 onChange={handleFileSelect}
-                accept="audio/*,.mp3,.wav,.flac,.m4a,.aac,.ogg,.wma,.opus"
+                accept=".wav,.mp3,.flac,.ogg"
                 id="file-upload"
               />
               <label
@@ -233,7 +236,7 @@ export default function Home() {
                   음악 파일을 클릭하거나 드래그하여 선택
                 </p>
                 <p className="text-sm text-zinc-500 dark:text-zinc-500">
-                  MP3, WAV, FLAC, M4A, AAC, OGG 등 지원
+                  WAV, MP3, FLAC, OGG 지원
                 </p>
               </label>
             </div>
@@ -385,7 +388,7 @@ export default function Home() {
                   type="file"
                   className="hidden"
                   onChange={handleFileSelect}
-                  accept="audio/*,.mp3,.wav,.flac,.m4a,.aac,.ogg,.wma,.opus"
+                  accept=".wav,.mp3,.flac,.ogg"
                   id="file-change"
                 />
                 <label
