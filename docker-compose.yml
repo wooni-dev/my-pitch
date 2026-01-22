@@ -28,6 +28,8 @@ services:
     environment:
       # API URL (.env에서 변경 가능, 기본값: Docker 네트워크 내부 주소)
       - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://my-pitch-api:5000}
+      # 파일 업로드 설정
+      - NEXT_PUBLIC_MAX_FILE_SIZE_MB=${MAX_FILE_SIZE_MB:-30}
       - TZ=Asia/Seoul
     restart: unless-stopped
     networks:
@@ -56,7 +58,7 @@ services:
       - ORIGINAL_BUCKET=${ORIGINAL_BUCKET:-original-tracks}
       - SEPARATED_BUCKET=${SEPARATED_BUCKET:-separated-tracks}
       # 파일 업로드 설정
-      - MAX_FILE_SIZE_MB=${MAX_FILE_SIZE_MB:-100}
+      - MAX_FILE_SIZE_MB=${MAX_FILE_SIZE_MB:-30}
       # 외부 분석 서버 (ngrok 주소 - .env에서 변경 가능)
       - ANALYSIS_SERVER_URL=${ANALYSIS_SERVER_URL:-https://melinda-subtemperate-grace.ngrok-free.dev}
       - TZ=Asia/Seoul

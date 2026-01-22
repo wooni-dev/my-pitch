@@ -4,6 +4,8 @@ import { useState, useRef, DragEvent, ChangeEvent } from "react";
 import { useRouter } from "next/navigation";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://api.my-pitch";
+const MAX_FILE_SIZE_MB = parseInt(process.env.NEXT_PUBLIC_MAX_FILE_SIZE_MB || "30", 10);
+const MAX_FILE_SIZE = MAX_FILE_SIZE_MB * 1024 * 1024; // bytes
 
 export default function Home() {
   const router = useRouter();
@@ -23,6 +25,10 @@ export default function Home() {
     return audioFileExtensions.some(ext => fileName.endsWith(ext));
   };
 
+  const isFileSizeValid = (file: File): boolean => {
+    return file.size <= MAX_FILE_SIZE;
+  };
+
   const handleDragOver = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     setIsDragging(true);
@@ -39,40 +45,70 @@ export default function Home() {
 
     const file = e.dataTransfer.files[0];
     if (file) {
-      if (isAudioFile(file)) {
-        setSelectedFile(file);
-        setVocalType(null); // 새 파일 선택 시 음역대 초기화
-        setUploadStatus("idle");
-        setErrorMessage("");
-      } else {
-        alert(`지원하지 않는 파일 형식입니다.\n\n지원 형식: WAV, MP3, FLAC, OGG\n선택한 파일: ${file.name}`);
+      // 파일 형식 체크
+      if (!isAudioFile(file)) {
         setErrorMessage("지원하지 않는 파일 형식입니다. (WAV, MP3, FLAC, OGG만 지원)");
         setSelectedFile(null);
+        return;
       }
+      
+      // 파일 크기 체크
+      if (!isFileSizeValid(file)) {
+        const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
+        setErrorMessage(`파일 크기가 ${MAX_FILE_SIZE_MB}MB를 초과했습니다. (파일 크기: ${fileSizeMB}MB)`);
+        setSelectedFile(null);
+        return;
+      }
+      
+      // 모든 검증 통과
+      setSelectedFile(file);
+      setVocalType(null); // 새 파일 선택 시 음역대 초기화
+      setUploadStatus("idle");
+      setErrorMessage("");
     }
   };
 
   const handleFileSelect = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (isAudioFile(file)) {
-        setSelectedFile(file);
-        setVocalType(null); // 새 파일 선택 시 음역대 초기화
-        setUploadStatus("idle");
-        setErrorMessage("");
-      } else {
-        alert(`지원하지 않는 파일 형식입니다.\n\n지원 형식: WAV, MP3, FLAC, OGG\n선택한 파일: ${file.name}`);
+      // 파일 형식 체크
+      if (!isAudioFile(file)) {
         setErrorMessage("지원하지 않는 파일 형식입니다. (WAV, MP3, FLAC, OGG만 지원)");
         setSelectedFile(null);
         if (fileInputRef.current) {
           fileInputRef.current.value = "";
         }
+        return;
       }
+      
+      // 파일 크기 체크
+      if (!isFileSizeValid(file)) {
+        const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
+        setErrorMessage(`파일 크기가 ${MAX_FILE_SIZE_MB}MB를 초과했습니다. (파일 크기: ${fileSizeMB}MB)`);
+        setSelectedFile(null);
+        if (fileInputRef.current) {
+          fileInputRef.current.value = "";
+        }
+        return;
+      }
+      
+      // 모든 검증 통과
+      setSelectedFile(file);
+      setVocalType(null); // 새 파일 선택 시 음역대 초기화
+      setUploadStatus("idle");
+      setErrorMessage("");
     }
   };
 
   const handleUpload = async () => {
     if (!selectedFile || !vocalType) return;
+
+    // 업로드 전 최종 파일 크기 체크
+    if (!isFileSizeValid(selectedFile)) {
+      const fileSizeMB = (selectedFile.size / (1024 * 1024)).toFixed(2);
+      setErrorMessage(`파일 크기가 ${MAX_FILE_SIZE_MB}MB를 초과했습니다. (현재: ${fileSizeMB}MB)`);
+      return;
+    }
 
     setIsUploading(true);
     setUploadStatus("idle");
@@ -236,7 +272,7 @@ export default function Home() {
                   음악 파일을 클릭하거나 드래그하여 선택
                 </p>
                 <p className="text-sm text-zinc-500 dark:text-zinc-500">
-                  WAV, MP3, FLAC, OGG 지원
+                  WAV, MP3, FLAC, OGG 지원 · 최대 {MAX_FILE_SIZE_MB}MB
                 </p>
               </label>
             </div>
@@ -414,26 +450,10 @@ export default function Home() {
             </div>
           )}
 
-          {uploadStatus === "success" && (
-            <div className="bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
-              <p className="text-sm font-medium text-green-800 dark:text-green-300">
-                파일이 성공적으로 업로드되었습니다!
-              </p>
-            </div>
-          )}
-
           {errorMessage && (
             <div className="bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
               <p className="text-sm font-medium text-red-800 dark:text-red-300">
                 {errorMessage}
-              </p>
-            </div>
-          )}
-
-          {uploadStatus === "error" && (
-            <div className="bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
-              <p className="text-sm font-medium text-red-800 dark:text-red-300">
-                업로드 중 오류가 발생했습니다. 다시 시도해주세요.
               </p>
             </div>
           )}
