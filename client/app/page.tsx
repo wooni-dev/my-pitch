@@ -225,10 +225,10 @@ export default function Home() {
         <div className="w-full max-w-2xl space-y-8">
           <div className="text-center">
             <h1 className="text-4xl font-bold leading-tight tracking-tight text-black dark:text-zinc-50 mb-4">
-              음악 파일 업로드
+              My Pitch
             </h1>
             <p className="text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-              음악 파일을 선택하거나 드래그하여 업로드하세요
+              부른 노래를 업로드하면 내 음정을 악보로 확인할 수 있어요
             </p>
           </div>
 
@@ -467,7 +467,7 @@ export default function Home() {
                 : "bg-zinc-200 text-zinc-400 cursor-not-allowed dark:bg-zinc-800 dark:text-zinc-600"
             }`}
           >
-            {isUploading ? "업로드 중..." : "업로드"}
+            {isUploading ? "변환 중..." : "악보로 변환"}
           </button>
         </div>
       </main>

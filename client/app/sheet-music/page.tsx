@@ -362,9 +362,6 @@ export default function SheetMusicPage() {
             <h1 className="text-4xl font-bold leading-tight tracking-tight text-black dark:text-zinc-50 mb-4">
               Sheet Music
             </h1>
-            <p className="text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-              음악 파일이 성공적으로 분석되었습니다
-            </p>
           </div>
 
           {isLoading ? (
@@ -386,20 +383,15 @@ export default function SheetMusicPage() {
             <>
               {/* 악보 표시 */}
               <div className="bg-zinc-50 dark:bg-zinc-900 rounded-lg p-8 border border-zinc-200 dark:border-zinc-800">
-                <div className="text-center space-y-4">
-                  <p className="text-lg font-medium text-zinc-900 dark:text-zinc-100 mb-4">
-                    악보 생성이 완료되었습니다
-                  </p>
-                  <div 
-                    ref={scrollContainerRef}
-                    className="overflow-x-auto max-w-full"
-                  >
-                    <div
-                      ref={containerRef}
-                      id="vexflow-output"
-                      className="bg-white rounded p-4 inline-block"
-                    />
-                  </div>
+                <div 
+                  ref={scrollContainerRef}
+                  className="overflow-x-auto max-w-full"
+                >
+                  <div
+                    ref={containerRef}
+                    id="vexflow-output"
+                    className="bg-white rounded p-4 inline-block"
+                  />
                 </div>
               </div>
 
