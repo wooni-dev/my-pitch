@@ -2,27 +2,21 @@
 
 import { useState, useRef, DragEvent, ChangeEvent } from "react";
 import { useRouter } from "next/navigation";
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://api.my-pitch";
-const MAX_FILE_SIZE_MB = parseInt(process.env.NEXT_PUBLIC_MAX_FILE_SIZE_MB || "30", 10);
-const MAX_FILE_SIZE = MAX_FILE_SIZE_MB * 1024 * 1024; // bytes
+import { API_BASE_URL, MAX_FILE_SIZE_MB, MAX_FILE_SIZE, AUDIO_FILE_EXTENSIONS } from "./constants";
 
 export default function Home() {
   const router = useRouter();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
-  const [uploadStatus, setUploadStatus] = useState<"idle" | "success" | "error">("idle");
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [vocalType, setVocalType] = useState<"female" | "male" | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const audioFileExtensions = [".wav", ".mp3", ".flac", ".ogg"];
   
   const isAudioFile = (file: File): boolean => {
     const fileName = file.name.toLowerCase();
     // 확장자만 엄격하게 체크 (MIME 타입 체크 제거)
-    return audioFileExtensions.some(ext => fileName.endsWith(ext));
+    return AUDIO_FILE_EXTENSIONS.some(ext => fileName.endsWith(ext));
   };
 
   const isFileSizeValid = (file: File): boolean => {
@@ -63,7 +57,6 @@ export default function Home() {
       // 모든 검증 통과
       setSelectedFile(file);
       setVocalType(null); // 새 파일 선택 시 음역대 초기화
-      setUploadStatus("idle");
       setErrorMessage("");
     }
   };
@@ -95,7 +88,6 @@ export default function Home() {
       // 모든 검증 통과
       setSelectedFile(file);
       setVocalType(null); // 새 파일 선택 시 음역대 초기화
-      setUploadStatus("idle");
       setErrorMessage("");
     }
   };
@@ -111,7 +103,6 @@ export default function Home() {
     }
 
     setIsUploading(true);
-    setUploadStatus("idle");
     setErrorMessage("");
 
     try {
@@ -136,13 +127,11 @@ export default function Home() {
       } else {
         const errorData = await response.json().catch(() => ({}));
         setErrorMessage(errorData.message || "업로드에 실패했습니다.");
-        setUploadStatus("error");
         setIsUploading(false); // 실패 시에만 모달 닫기
       }
     } catch (error) {
       console.error("Upload error:", error);
       setErrorMessage("서버와 통신 중 오류가 발생했습니다.");
-      setUploadStatus("error");
       setIsUploading(false); // 에러 시에만 모달 닫기
     }
   };
@@ -294,7 +283,6 @@ export default function Home() {
                   onClick={() => {
                     setSelectedFile(null);
                     setVocalType(null);
-                    setUploadStatus("idle");
                     if (fileInputRef.current) {
                       fileInputRef.current.value = "";
                     }

@@ -80,6 +80,7 @@ def analyze_track():
             # 7. 응답 데이터 구성
             response_data = {
                 'clef': clef,
+                'original_filename': file_info['original_filename'],
                 'file_url': f"{MINIO_PUBLIC_ENDPOINT}/{ORIGINAL_BUCKET}/{file_info['unique_filename']}",
                 'notes': pitch_data
             }

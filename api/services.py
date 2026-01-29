@@ -49,6 +49,7 @@ def save_uploaded_file(file, minio_client: Minio, bucket_name: str):
     filename_without_ext = os.path.splitext(unique_filename)[0]
 
     return {
+        'original_filename': file.filename,
         'unique_filename': unique_filename,
         'separated_folder': filename_without_ext,
         'file_data': file_data,  # 다른 서버로 전송하기 위해 추가
