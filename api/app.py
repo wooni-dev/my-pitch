@@ -1,6 +1,7 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from minio.error import S3Error
+import os
 
 from config import (
     MINIO_PUBLIC_ENDPOINT,
@@ -78,9 +79,10 @@ def analyze_track():
             clef = 'treble' if vocal_type == 'female' else 'bass'
 
             # 7. 응답 데이터 구성
+            filename_without_ext = os.path.splitext(file_info['original_filename'])[0]
             response_data = {
                 'clef': clef,
-                'original_filename': file_info['original_filename'],
+                'original_filename': filename_without_ext,
                 'file_url': f"{MINIO_PUBLIC_ENDPOINT}/{ORIGINAL_BUCKET}/{file_info['unique_filename']}",
                 'notes': pitch_data
             }
