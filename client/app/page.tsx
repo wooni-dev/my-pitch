@@ -216,9 +216,55 @@ export default function Home() {
             <h1 className="text-4xl font-bold leading-tight tracking-tight text-black dark:text-zinc-50 mb-4">
               My Pitch
             </h1>
-            <p className="text-lg leading-8 text-zinc-600 dark:text-zinc-400">
+            <p className="text-lg leading-8 text-zinc-600 dark:text-zinc-400 mb-6">
               부른 노래를 업로드하면 내 음정을 악보로 확인할 수 있어요
             </p>
+          </div>
+
+          {/* 사용 안내 */}
+          <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900 rounded-xl p-6">
+            <div className="flex items-start gap-3 mb-4">
+              <svg 
+                className="w-6 h-6 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" 
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+              >
+                <path 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round" 
+                  strokeWidth={2} 
+                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" 
+                />
+              </svg>
+              <div>
+                <h2 className="text-lg font-semibold text-blue-900 dark:text-blue-300 mb-2">
+                  사용 안내
+                </h2>
+                <p className="text-sm text-blue-800 dark:text-blue-300 mb-3">
+                  노래방에서 녹음한 음성으로 음높이를 확인하기 위한 서비스입니다
+                </p>
+              </div>
+            </div>
+            
+            <div className="space-y-2 text-sm text-blue-800 dark:text-blue-300">
+              <div className="flex items-start gap-2">
+                <span className="text-blue-600 dark:text-blue-400 font-bold">•</span>
+                <span>악보는 <strong>노래방 악보처럼 간소화</strong>되어 표시됩니다</span>
+              </div>
+              <div className="flex items-start gap-2">
+                <span className="text-blue-600 dark:text-blue-400 font-bold">•</span>
+                <span>박자는 <strong>4/4박자로 고정</strong>되어 있습니다</span>
+              </div>
+              <div className="flex items-start gap-2">
+                <span className="text-blue-600 dark:text-blue-400 font-bold">•</span>
+                <span>모든 음표는 <strong>높은음자리표(G clef)로 통일</strong>되어 표시됩니다</span>
+              </div>
+              <div className="flex items-start gap-2">
+                <span className="text-blue-600 dark:text-blue-400 font-bold">•</span>
+                <span>복잡한 악보 규칙은 생략되어 <strong>음높이 확인에만 집중</strong>할 수 있습니다</span>
+              </div>
+            </div>
           </div>
 
           {!selectedFile && (
