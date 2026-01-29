@@ -1,0 +1,14 @@
+services:
+  nginx:
+    image: nginx:latest
+    container_name: my-pitch-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/html:/usr/share/nginx/html
+      - ./nginx/conf.d/production-http.conf:/etc/nginx/conf.d/default.conf  # 배포용 설정만 로드
+      - /var/www/certbot:/var/www/certbot  # Let's Encrypt용
+    environment:
+      - TZ=Asia/Seoul
+    restart: unless-stopped
