@@ -27,8 +27,8 @@ services:
     ports:
       - "3000:3000"
     environment:
-      # API URL (.env에서 변경 가능, 기본값: /api 경로 사용)
-      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-/api}
+      # API URL (.env에서 변경 가능, 기본값: api 서브도메인 사용)
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://api.my-pitch.work}
       # 파일 업로드 설정
       - NEXT_PUBLIC_MAX_FILE_SIZE_MB=${MAX_FILE_SIZE_MB:-30}
       - NODE_ENV=production
