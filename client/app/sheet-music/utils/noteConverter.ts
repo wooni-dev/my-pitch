@@ -1,4 +1,4 @@
-import { StaveNote, Accidental } from "vexflow";
+import { StaveNote, Accidental, Stem } from "vexflow";
 
 /**
  * API 노트 데이터를 VexFlow 악보로 변환하는 유틸리티
@@ -107,6 +107,40 @@ function durationToBeats(duration: string): number {
 }
 
 /**
+ * 음표의 stem 방향을 결정하는 함수
+ * treble clef 기준으로 중간선(B/4)을 기준으로 위/아래 판단
+ * 
+ * @param noteKey - VexFlow 형식의 음표 키 (예: "c/4", "e/5")
+ * @returns Stem.UP (위로) 또는 Stem.DOWN (아래로)
+ */
+function determineStemDirection(noteKey: string): number {
+  // 음표와 옥타브 파싱 (예: "c/4" -> note="c", octave=4)
+  const [noteLetter, octaveStr] = noteKey.split('/');
+  const octave = parseInt(octaveStr);
+  
+  // 음표를 숫자로 변환 (비교를 위해)
+  const noteValues: { [key: string]: number } = {
+    'c': 0, 'd': 1, 'e': 2, 'f': 3, 'g': 4, 'a': 5, 'b': 6
+  };
+  
+  const noteValue = noteValues[noteLetter.toLowerCase()];
+  const middleLineValue = noteValues['b']; // 중간선은 B
+  const middleLineOctave = 4; // B/4
+  
+  // 현재 음표의 전체 높이 계산 (옥타브 * 7 + 음표값)
+  const currentHeight = octave * 7 + noteValue;
+  const middleLineHeight = middleLineOctave * 7 + middleLineValue;
+  
+  // 중간선보다 위에 있으면 꼬리를 아래로, 아래에 있으면 꼬리를 위로
+  // 정확히 중간선에 있으면 관습적으로 아래로
+  if (currentHeight >= middleLineHeight) {
+    return Stem.DOWN; // 꼬리 아래로
+  } else {
+    return Stem.UP; // 꼬리 위로
+  }
+}
+
+/**
  * API 노트 데이터를 VexFlow StaveNote로 변환
  * 
  * 음정(pitch)만 정확하게 변환하고, 모든 음표는 4분음표로 통일합니다.
@@ -119,9 +153,13 @@ export function convertApiNoteToStaveNote(apiNote: ApiNote, octaveShift: number 
   const { key, accidental } = convertNoteNameToVexFlow(apiNote.note, octaveShift);
   const duration = convertDurationToVexFlow(apiNote.duration);
   
+  // stem 방향 결정
+  const stemDirection = determineStemDirection(key);
+  
   const staveNote = new StaveNote({
     keys: [key],
     duration: duration,
+    stemDirection: stemDirection,
   });
   
   // 샾/플랫 추가

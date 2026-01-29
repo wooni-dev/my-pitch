@@ -32,8 +32,8 @@ export function initializeRenderer(
   const stavesPerRow = calculateStavesPerRow(containerWidth);
   const { rows } = calculateStaveLayout(totalStaveCount, stavesPerRow);
 
-  // 전체 캔버스 크기 설정 (마디 높이 * 행 개수 + 행 사이 간격 + 마지막 줄 아래 여백)
-  const totalHeight = STAVE_HEIGHT * rows + STAVE_ROW_MARGIN * rows;
+  // 전체 캔버스 크기 설정 (위쪽 여백 + 마디 높이 * 행 개수 + 행 사이 간격 + 아래쪽 여백)
+  const totalHeight = STAVE_ROW_MARGIN + STAVE_HEIGHT * rows + STAVE_ROW_MARGIN * rows;
   renderer.resize(containerWidth, totalHeight);
   const context = renderer.getContext();
 

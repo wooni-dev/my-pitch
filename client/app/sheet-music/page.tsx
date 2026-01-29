@@ -74,6 +74,13 @@ export default function SheetMusicPage() {
       setCurrentTime(0);
       lastActiveNoteIndexRef.current = -1;
       
+      // 모든 하이라이트 제거
+      const svgElement = containerRef.current?.querySelector('svg');
+      if (svgElement) {
+        const highlights = svgElement.querySelectorAll('.note-highlight');
+        highlights.forEach(highlight => highlight.remove());
+      }
+      
       // 맨 위로 스크롤
       window.scrollTo({
         top: 0,
@@ -137,13 +144,20 @@ export default function SheetMusicPage() {
       // 음표의 bounding box 가져오기
       const bbox = (activeNoteElement as SVGGraphicsElement).getBBox();
       
+      // 5선보의 정확한 중심선 y 좌표
+      const staveCenterY = parseFloat(activeNoteElement.getAttribute('data-stave-center-y') || '0');
+      
+      // 하이라이트 높이 (5선보 + 음표 stem을 포함)
+      const noteHeadHeight = 100;
+      const highlightY = staveCenterY - noteHeadHeight / 2;
+      
       // 사각형 하이라이트 생성
       const highlight = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
       highlight.classList.add('note-highlight');
       highlight.setAttribute('x', String(bbox.x - 5));
-      highlight.setAttribute('y', String(bbox.y - 5));
+      highlight.setAttribute('y', String(highlightY));
       highlight.setAttribute('width', String(bbox.width + 10));
-      highlight.setAttribute('height', String(bbox.height + 10));
+      highlight.setAttribute('height', String(noteHeadHeight));
       highlight.setAttribute('fill', highlightColors.fill);
       highlight.setAttribute('fill-opacity', '0.35');
       highlight.setAttribute('stroke', highlightColors.stroke);
@@ -201,6 +215,13 @@ export default function SheetMusicPage() {
       setCurrentTime(0);
       lastActiveNoteIndexRef.current = -1;
       
+      // 모든 하이라이트 제거
+      const svgElement = containerRef.current?.querySelector('svg');
+      if (svgElement) {
+        const highlights = svgElement.querySelectorAll('.note-highlight');
+        highlights.forEach(highlight => highlight.remove());
+      }
+      
       // 맨 위로 스크롤
       window.scrollTo({
         top: 0,
@@ -231,7 +252,7 @@ export default function SheetMusicPage() {
       );
       
       // 마디 그리드 생성 및 렌더링
-      renderStaveGrid({
+      const { staveCenterYPositions } = renderStaveGrid({
         context,
         totalStaveCount,
         stavesPerRow,
@@ -249,13 +270,32 @@ export default function SheetMusicPage() {
         
         // 원본 API 노트 데이터와 매핑 (쉼표 제외)
         let noteIndex = 0;
+        let currentStaveIndex = 0;
+        let notesInCurrentStave = 0;
+        
         noteElements.forEach((element, i) => {
           // 쉼표가 아닌 경우에만 시간 정보 추가
           if (noteIndex < apiData.notes.length) {
             const apiNote = apiData.notes[noteIndex];
+            
+            // 현재 마디의 음표 개수 확인 (마디 변경 시점 파악)
+            if (stavesData && stavesData[currentStaveIndex]) {
+              if (notesInCurrentStave >= stavesData[currentStaveIndex].length) {
+                currentStaveIndex++;
+                notesInCurrentStave = 0;
+              }
+            }
+            
+            // 마디의 중심 y 좌표 가져오기
+            const staveCenterY = staveCenterYPositions[currentStaveIndex] || 0;
+            
             element.setAttribute('data-note-index', String(noteIndex));
             element.setAttribute('data-start-time', String(apiNote.start_time));
             element.setAttribute('data-end-time', String(apiNote.end_time));
+            element.setAttribute('data-stave-index', String(currentStaveIndex));
+            element.setAttribute('data-stave-center-y', String(staveCenterY));
+            
+            notesInCurrentStave++;
             
             // 클릭 가능하도록 스타일 및 호버 효과 추가
             (element as HTMLElement).style.cursor = 'pointer';

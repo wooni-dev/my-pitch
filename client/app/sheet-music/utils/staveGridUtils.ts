@@ -20,11 +20,19 @@ export interface RenderStaveGridOptions {
 }
 
 /**
+ * 마디 그리드 렌더링 결과
+ */
+export interface RenderStaveGridResult {
+  staveGrid: Stave[][];
+  staveCenterYPositions: number[]; // 각 마디의 중심 y 좌표
+}
+
+/**
  * 마디 그리드를 생성하고 렌더링합니다.
  * @param options 렌더링 옵션
- * @returns 생성된 마디 그리드 (2D 배열)
+ * @returns 생성된 마디 그리드와 중심 y 좌표 배열
  */
-export function renderStaveGrid(options: RenderStaveGridOptions): Stave[][] {
+export function renderStaveGrid(options: RenderStaveGridOptions): RenderStaveGridResult {
   const { 
     context, 
     totalStaveCount, 
@@ -37,6 +45,9 @@ export function renderStaveGrid(options: RenderStaveGridOptions): Stave[][] {
 
   // 2D 배열로 마디 저장 (행별로 관리)
   const staveGrid: Stave[][] = Array.from({ length: rows }, () => []);
+  
+  // 각 마디의 중심 y 좌표 저장
+  const staveCenterYPositions: number[] = [];
 
   // 마디 생성 (행 우선 순회)
   for (let row = 0; row < rows; row++) {
@@ -70,10 +81,13 @@ export function renderStaveGrid(options: RenderStaveGridOptions): Stave[][] {
       // 마지막 마디인지 확인
       const isLastStave = staveIndex === totalStaveCount - 1;
       
-      // 마디 생성 (행 간격을 고려한 y 위치)
+      // 마디의 y 위치 계산
+      const staveY = STAVE_ROW_MARGIN + row * (STAVE_HEIGHT + STAVE_ROW_MARGIN);
+      
+      // 마디 생성 (위쪽 여백 + 행 간격을 고려한 y 위치)
       const { stave, noteSpaceWidth } = createStave({
         x: currentX,
-        y: row * (STAVE_HEIGHT + STAVE_ROW_MARGIN),
+        y: staveY,
         width,
         context,
         clef: isFirstInRow ? clef : undefined,
@@ -81,6 +95,10 @@ export function renderStaveGrid(options: RenderStaveGridOptions): Stave[][] {
         noteSpaceRightMargin: 20,
         endBarType: isLastStave ? BarlineType.END : undefined, // 마지막 마디에만 종지선 추가
       });
+      
+      // 5선보의 정확한 중심 y 좌표 (line 2 = 5선보의 가운데 선)
+      const staveCenterY = stave.getYForLine(2);
+      staveCenterYPositions[staveIndex] = staveCenterY;
 
       currentX += width; // 다음 마디의 x 위치 계산
       staveGrid[row][col] = stave;
@@ -104,6 +122,6 @@ export function renderStaveGrid(options: RenderStaveGridOptions): Stave[][] {
     }
   }
 
-  return staveGrid;
+  return { staveGrid, staveCenterYPositions };
 }
 
