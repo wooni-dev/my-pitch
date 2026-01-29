@@ -256,6 +256,42 @@ export default function SheetMusicPage() {
             element.setAttribute('data-note-index', String(noteIndex));
             element.setAttribute('data-start-time', String(apiNote.start_time));
             element.setAttribute('data-end-time', String(apiNote.end_time));
+            
+            // 클릭 가능하도록 스타일 및 호버 효과 추가
+            (element as HTMLElement).style.cursor = 'pointer';
+            (element as HTMLElement).style.transition = 'opacity 0.2s';
+            
+            // 호버 효과
+            element.addEventListener('mouseenter', () => {
+              (element as HTMLElement).style.opacity = '0.6';
+            });
+            
+            element.addEventListener('mouseleave', () => {
+              (element as HTMLElement).style.opacity = '1';
+            });
+            
+            // 클릭 이벤트 추가
+            element.addEventListener('click', () => {
+              const startTime = parseFloat(element.getAttribute('data-start-time') || '0');
+              
+              if (audioRef.current) {
+                // 오디오 시간을 클릭한 음표 시작 시간으로 설정
+                audioRef.current.currentTime = startTime;
+                setCurrentTime(startTime);
+                
+                // 해당 음표로 스크롤
+                const noteRect = element.getBoundingClientRect();
+                const windowHeight = window.innerHeight;
+                const noteCenter = noteRect.top + noteRect.height / 2;
+                const targetScroll = window.scrollY + noteCenter - windowHeight / 2;
+                
+                window.scrollTo({
+                  top: targetScroll,
+                  behavior: 'smooth'
+                });
+              }
+            });
+            
             noteIndex++;
           }
         });
