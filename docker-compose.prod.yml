@@ -12,3 +12,29 @@ services:
     environment:
       - TZ=Asia/Seoul
     restart: unless-stopped
+    depends_on:
+      - client
+    networks:
+      - my-pitch-network
+
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile.prod  # 프로덕션 Dockerfile 사용
+    container_name: my-pitch-client
+    ports:
+      - "3000:3000"
+    environment:
+      # API URL (.env에서 변경 가능, 기본값: Docker 네트워크 내부 주소)
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://my-pitch-api:5000}
+      # 파일 업로드 설정
+      - NEXT_PUBLIC_MAX_FILE_SIZE_MB=${MAX_FILE_SIZE_MB:-30}
+      - NODE_ENV=production
+      - TZ=Asia/Seoul
+    restart: unless-stopped
+    networks:
+      - my-pitch-network
+
+networks:
+  my-pitch-network:
+    driver: bridge
