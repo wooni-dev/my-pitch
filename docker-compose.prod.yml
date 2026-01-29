@@ -14,6 +14,7 @@ services:
     restart: unless-stopped
     depends_on:
       - client
+      - api
       - fileserver
     networks:
       - my-pitch-network
@@ -26,8 +27,8 @@ services:
     ports:
       - "3000:3000"
     environment:
-      # API URL (.env에서 변경 가능, 기본값: Docker 네트워크 내부 주소)
-      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://my-pitch-api:5000}
+      # API URL (.env에서 변경 가능, 기본값: /api 경로 사용)
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-/api}
       # 파일 업로드 설정
       - NEXT_PUBLIC_MAX_FILE_SIZE_MB=${MAX_FILE_SIZE_MB:-30}
       - NODE_ENV=production
@@ -35,6 +36,34 @@ services:
     restart: unless-stopped
     networks:
       - my-pitch-network
+
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile.prod  # 프로덕션 Dockerfile 사용
+    container_name: my-pitch-api
+    expose:
+      - "5000"  # 내부 네트워크에만 노출
+    environment:
+      # MinIO 설정
+      - MINIO_ENDPOINT=${MINIO_ENDPOINT:-fileserver:9000}
+      - MINIO_PUBLIC_ENDPOINT=${MINIO_PUBLIC_ENDPOINT:-http://my-pitch.work/files}
+      - MINIO_ROOT_USER=${MINIO_ROOT_USER:-minioadmin}
+      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD:-minioadmin}
+      # 버킷 설정
+      - ORIGINAL_BUCKET=${ORIGINAL_BUCKET:-original-tracks}
+      - SEPARATED_BUCKET=${SEPARATED_BUCKET:-separated-tracks}
+      # 파일 업로드 설정
+      - MAX_FILE_SIZE_MB=${MAX_FILE_SIZE_MB:-30}
+      # 외부 분석 서버
+      - ANALYSIS_SERVER_URL=${ANALYSIS_SERVER_URL:-https://melinda-subtemperate-grace.ngrok-free.dev}
+      - FLASK_ENV=production
+      - TZ=Asia/Seoul
+    restart: unless-stopped
+    networks:
+      - my-pitch-network
+    depends_on:
+      - fileserver
 
   fileserver:
     image: minio/minio:latest
