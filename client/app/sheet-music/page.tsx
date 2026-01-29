@@ -16,7 +16,7 @@ export default function SheetMusicPage() {
   // 오디오 재생 상태
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
-  const animationFrameRef = useRef<number>();
+  const animationFrameRef = useRef<number | undefined>(undefined);
   const lastActiveNoteIndexRef = useRef<number>(-1);
   
   // 컨테이너 크기 변화 감지
