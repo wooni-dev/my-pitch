@@ -15,6 +15,9 @@ export default function SheetMusicPage() {
   
   // 오디오 재생 상태
   const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const animationFrameRef = useRef<number>();
+  const lastActiveNoteIndexRef = useRef<number>(-1);
   
   // 컨테이너 크기 변화 감지
   const resizeTrigger = useResizeObserver(containerRef);
@@ -31,6 +34,150 @@ export default function SheetMusicPage() {
   // 오디오 URL 추출
   const audioUrl = apiData.file_url || '';
   
+  // clef에 따른 하이라이트 색상 설정
+  const highlightColors = apiData.clef === 'bass' 
+    ? { fill: '#3B82F6', stroke: '#2563EB' } // 남성 보컬 (파란색)
+    : { fill: '#EC4899', stroke: '#DB2777' }; // 여성 보컬 (핑크색)
+  
+  // 오디오 시간 업데이트 함수
+  const updateCurrentTime = () => {
+    if (audioRef.current && isPlaying) {
+      setCurrentTime(audioRef.current.currentTime);
+      animationFrameRef.current = requestAnimationFrame(updateCurrentTime);
+    }
+  };
+
+  // 재생 상태 변경 시 시간 업데이트 시작/중지
+  useEffect(() => {
+    if (isPlaying) {
+      animationFrameRef.current = requestAnimationFrame(updateCurrentTime);
+    } else {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+    }
+    
+    return () => {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+    };
+  }, [isPlaying]);
+
+  // 오디오 종료 이벤트 처리
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    const handleEnded = () => {
+      setIsPlaying(false);
+      setCurrentTime(0);
+      lastActiveNoteIndexRef.current = -1;
+      
+      // 맨 위로 스크롤
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    };
+
+    audio.addEventListener('ended', handleEnded);
+    
+    return () => {
+      audio.removeEventListener('ended', handleEnded);
+    };
+  }, []);
+
+  // 음표 하이라이트 업데이트
+  useEffect(() => {
+    if (!containerRef.current) return;
+
+    const svgElement = containerRef.current.querySelector('svg');
+    if (!svgElement) return;
+
+    const noteElements = svgElement.querySelectorAll('.vf-stavenote[data-start-time]');
+    let activeNoteElement: Element | null = null;
+    let currentActiveIndex = -1;
+    
+    // 현재 재생 중인 음표 찾기
+    noteElements.forEach((element, index) => {
+      const startTime = parseFloat(element.getAttribute('data-start-time') || '0');
+      const endTime = parseFloat(element.getAttribute('data-end-time') || '0');
+      
+      // 현재 재생 시간이 음표의 시작 시간을 지났는지 확인
+      if (currentTime >= startTime) {
+        // 가장 최근에 시작된 음표 찾기
+        if (index > currentActiveIndex) {
+          currentActiveIndex = index;
+          activeNoteElement = element;
+        }
+      }
+    });
+    
+    // 활성 음표가 있으면 인덱스 업데이트
+    if (currentActiveIndex !== -1) {
+      lastActiveNoteIndexRef.current = currentActiveIndex;
+    }
+    
+    // 활성 음표가 없으면 마지막 음표 사용
+    if (!activeNoteElement && lastActiveNoteIndexRef.current !== -1) {
+      activeNoteElement = noteElements[lastActiveNoteIndexRef.current];
+    }
+    
+    // 모든 하이라이트 제거
+    noteElements.forEach((element) => {
+      const existingHighlight = element.querySelector('.note-highlight');
+      if (existingHighlight) {
+        existingHighlight.remove();
+      }
+    });
+    
+    // 활성 음표에 하이라이트 추가
+    if (activeNoteElement) {
+      // 음표의 bounding box 가져오기
+      const bbox = (activeNoteElement as SVGGraphicsElement).getBBox();
+      
+      // 사각형 하이라이트 생성
+      const highlight = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      highlight.classList.add('note-highlight');
+      highlight.setAttribute('x', String(bbox.x - 5));
+      highlight.setAttribute('y', String(bbox.y - 5));
+      highlight.setAttribute('width', String(bbox.width + 10));
+      highlight.setAttribute('height', String(bbox.height + 10));
+      highlight.setAttribute('fill', highlightColors.fill);
+      highlight.setAttribute('fill-opacity', '0.35');
+      highlight.setAttribute('stroke', highlightColors.stroke);
+      highlight.setAttribute('stroke-width', '2.5');
+      highlight.setAttribute('rx', '4');
+      
+      // 음표 뒤에 하이라이트 삽입 (배경으로)
+      activeNoteElement.insertBefore(highlight, activeNoteElement.firstChild);
+    }
+
+    // 활성 음표가 있으면 해당 위치로 스크롤
+    if (activeNoteElement && isPlaying) {
+      const noteRect = activeNoteElement.getBoundingClientRect();
+      const windowHeight = window.innerHeight;
+      
+      // 음표가 화면의 중앙 50% 영역 밖에 있는지 확인
+      const isOutOfCenterView = 
+        noteRect.top < windowHeight * 0.25 || 
+        noteRect.bottom > windowHeight * 0.75;
+      
+      // 화면 중앙 영역을 벗어나면 스크롤
+      if (isOutOfCenterView) {
+        // 음표를 화면 중앙으로 이동
+        const noteCenter = noteRect.top + noteRect.height / 2;
+        const targetScroll = window.scrollY + noteCenter - windowHeight / 2;
+        
+        window.scrollTo({
+          top: targetScroll,
+          behavior: 'smooth'
+        });
+      }
+    }
+  }, [currentTime, isPlaying]);
+
   // 오디오 컨트롤 함수들
   const handlePlay = () => {
     if (audioRef.current) {
@@ -51,6 +198,14 @@ export default function SheetMusicPage() {
       audioRef.current.currentTime = 0;
       audioRef.current.pause();
       setIsPlaying(false);
+      setCurrentTime(0);
+      lastActiveNoteIndexRef.current = -1;
+      
+      // 맨 위로 스크롤
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
     }
   };
 
@@ -85,6 +240,26 @@ export default function SheetMusicPage() {
         clef: "treble", // 항상 treble clef로 표시 (bass인 경우 음표는 1옥타브 올려서 변환됨)
         stavesData, // 변환된 노트 데이터 전달
       });
+
+      // 렌더링 후 각 음표에 시간 정보를 data attribute로 추가
+      const svgElement = containerRef.current.querySelector('svg');
+      if (svgElement && apiData.notes) {
+        // VexFlow가 생성한 모든 음표 요소 찾기 (vf-stavenote 클래스)
+        const noteElements = svgElement.querySelectorAll('.vf-stavenote');
+        
+        // 원본 API 노트 데이터와 매핑 (쉼표 제외)
+        let noteIndex = 0;
+        noteElements.forEach((element, i) => {
+          // 쉼표가 아닌 경우에만 시간 정보 추가
+          if (noteIndex < apiData.notes.length) {
+            const apiNote = apiData.notes[noteIndex];
+            element.setAttribute('data-note-index', String(noteIndex));
+            element.setAttribute('data-start-time', String(apiNote.start_time));
+            element.setAttribute('data-end-time', String(apiNote.end_time));
+            noteIndex++;
+          }
+        });
+      }
 
     } catch (error) {
       console.error('VexFlow 렌더링 오류:', error);
