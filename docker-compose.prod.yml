@@ -14,6 +14,7 @@ services:
     restart: unless-stopped
     depends_on:
       - client
+      - fileserver
     networks:
       - my-pitch-network
 
@@ -31,6 +32,24 @@ services:
       - NEXT_PUBLIC_MAX_FILE_SIZE_MB=${MAX_FILE_SIZE_MB:-30}
       - NODE_ENV=production
       - TZ=Asia/Seoul
+    restart: unless-stopped
+    networks:
+      - my-pitch-network
+
+  fileserver:
+    image: minio/minio:latest
+    container_name: my-pitch-fileserver
+    ports:
+      - "9000:9000"  # API 포트 (API 서버 접근용)
+      - "9001:9001"  # 웹 UI 포트 (관리용)
+    environment:
+      # MinIO 관리자 계정 (.env에서 변경 가능)
+      - MINIO_ROOT_USER=${MINIO_ROOT_USER:-minioadmin}
+      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD:-minioadmin}
+      - TZ=Asia/Seoul
+    volumes:
+      - ./fileserver/data:/data
+    command: server /data --console-address ":9001"
     restart: unless-stopped
     networks:
       - my-pitch-network
