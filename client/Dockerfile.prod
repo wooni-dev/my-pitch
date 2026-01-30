@@ -5,6 +5,14 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
+# 빌드 인자 정의 (docker-compose에서 전달받음)
+ARG NEXT_PUBLIC_API_URL
+ARG NEXT_PUBLIC_MAX_FILE_SIZE_MB
+
+# 빌드 시점에 환경변수로 설정
+ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+ENV NEXT_PUBLIC_MAX_FILE_SIZE_MB=${NEXT_PUBLIC_MAX_FILE_SIZE_MB}
+
 # package.json과 package-lock.json 복사
 COPY package*.json ./
 
@@ -14,7 +22,7 @@ RUN npm ci
 # 전체 소스코드 복사
 COPY . .
 
-# Next.js 프로덕션 빌드
+# Next.js 프로덕션 빌드 (환경변수가 코드에 번들링됨)
 RUN npm run build
 
 # ========================================

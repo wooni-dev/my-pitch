@@ -22,12 +22,12 @@ services:
     build:
       context: ./client
       dockerfile: Dockerfile.prod  # 프로덕션 Dockerfile 사용
+      args:
+        # 빌드 시점에 환경변수 전달 (Next.js는 빌드 타임에 NEXT_PUBLIC_* 변수를 번들링)
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://api.my-pitch.work}
+        NEXT_PUBLIC_MAX_FILE_SIZE_MB: ${MAX_FILE_SIZE_MB:-7}
     container_name: my-pitch-client
     environment:
-      # API URL (.env에서 변경 가능, 기본값: api 서브도메인 사용)
-      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://api.my-pitch.work}
-      # 파일 업로드 설정
-      - NEXT_PUBLIC_MAX_FILE_SIZE_MB=${MAX_FILE_SIZE_MB:-7}
       - NODE_ENV=production
       - TZ=Asia/Seoul
     restart: unless-stopped
