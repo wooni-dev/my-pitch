@@ -110,7 +110,7 @@ export default function Home() {
       formData.append("music_file", selectedFile);
       formData.append("vocal_type", vocalType);
 
-      const response = await fetch(`${API_BASE_URL}/v1/tracks/analyze`, {
+      const response = await fetch(`${API_BASE_URL}/tracks/analyze`, {
         method: "POST",
         body: formData,
       });

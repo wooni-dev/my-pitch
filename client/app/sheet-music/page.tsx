@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import fallbackSheetMusicData from "../../api.json";
+import { useRouter } from "next/navigation";
 import { useResizeObserver } from "../hooks/useResizeObserver";
 import { useSheetMusicData } from "../hooks/useSheetMusicData";
 import { initializeRenderer } from "./utils/rendererUtils";
@@ -10,6 +10,7 @@ import { convertApiDataToStaves } from "./utils/noteConverter";
 import type { ApiSheetMusicData } from "./utils/noteConverter";
 
 export default function SheetMusicPage() {
+  const router = useRouter();
   const containerRef = useRef<HTMLDivElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
   
@@ -23,10 +24,56 @@ export default function SheetMusicPage() {
   const resizeTrigger = useResizeObserver(containerRef);
   
   // 악보 데이터 로드
-  const [sheetMusicData, dataLoaded] = useSheetMusicData(fallbackSheetMusicData);
+  const [sheetMusicData, dataLoaded, loadError] = useSheetMusicData<ApiSheetMusicData>();
+  
+  // 데이터 로딩 에러 처리
+  if (dataLoaded && loadError) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-black font-sans">
+        <div className="max-w-md w-full mx-4 bg-white dark:bg-zinc-900 rounded-2xl p-8 shadow-2xl border border-zinc-200 dark:border-zinc-800">
+          <div className="text-center space-y-4">
+            <svg 
+              className="w-16 h-16 mx-auto text-red-500" 
+              fill="none" 
+              stroke="currentColor" 
+              viewBox="0 0 24 24"
+            >
+              <path 
+                strokeLinecap="round" 
+                strokeLinejoin="round" 
+                strokeWidth={2} 
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" 
+              />
+            </svg>
+            <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">
+              데이터 로드 실패
+            </h2>
+            <p className="text-sm text-zinc-600 dark:text-zinc-400">
+              {loadError}
+            </p>
+            <button
+              onClick={() => router.push('/')}
+              className="w-full mt-4 px-4 py-3 bg-black text-white dark:bg-white dark:text-black rounded-lg font-medium hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors cursor-pointer"
+            >
+              홈으로 돌아가기
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  
+  // 데이터가 없으면 로딩 표시
+  if (!sheetMusicData) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-black font-sans">
+        <div className="text-white">로딩 중...</div>
+      </div>
+    );
+  }
   
   // 제목 추출 (original_filename에서 확장자 제거)
-  const apiData = sheetMusicData as ApiSheetMusicData;
+  const apiData = sheetMusicData;
   const title = apiData.original_filename 
     ? apiData.original_filename.replace(/\.(mp3|wav|m4a)$/i, '') 
     : '악보';
