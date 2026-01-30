@@ -52,6 +52,14 @@ services:
       - MAX_FILE_SIZE_MB=${MAX_FILE_SIZE_MB:-7}
       - FLASK_ENV=production
       - TZ=Asia/Seoul
+    # GPU 설정
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all  # 모든 GPU 사용 (특정 개수 지정하려면 숫자로 변경, 예: 1)
+              capabilities: [gpu]
     restart: unless-stopped
     networks:
       - my-pitch-network
