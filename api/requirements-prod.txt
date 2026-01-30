@@ -1,0 +1,10 @@
+# 배포용 requirements (기본 + 추가 패키지)
+-r requirements.txt
+
+# 프로덕션 WSGI 서버
+gunicorn==21.2.0
+
+# 오디오 소스 분리
+demucs==4.0.1
+
+

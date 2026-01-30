@@ -8,7 +8,9 @@ from minio import Minio
 from config import (
     MINIO_PUBLIC_ENDPOINT,
     ANALYSIS_SERVER_URL,
-    SEPARATED_BUCKET
+    SEPARATED_BUCKET,
+    TEMP_UPLOAD_FOLDER,
+    TEMP_OUTPUT_FOLDER
 )
 from utils import extract_pitch_info
 
@@ -207,4 +209,147 @@ def download_and_save_separated_files(analysis_result: dict, separated_folder: s
         saved_files['mr_minio_url'] = f"{MINIO_PUBLIC_ENDPOINT}/{SEPARATED_BUCKET}/{mr_object_name}"
     
     return saved_files
+
+
+def separate_audio_locally(file_data: bytes, unique_filename: str, separated_folder: str, minio_client: Minio):
+    """
+    로컬에서 demucs를 사용하여 보컬/MR 분리 후 MinIO에 저장
+    
+    Args:
+        file_data: 원본 파일 바이너리 데이터
+        unique_filename: 원본 파일명 (확장자 포함)
+        separated_folder: MinIO에 저장할 폴더명
+        minio_client: MinIO 클라이언트 인스턴스
+    
+    Returns:
+        dict: 저장된 파일 정보 {'vocal_minio_url': str, 'vocal_object_name': str, 'mr_minio_url': str}
+    
+    Raises:
+        Exception: demucs 실행 또는 파일 저장 실패 시
+    """
+    # 배포 환경에서만 사용되는 패키지 (로컬 개발 환경에는 설치되지 않음)
+    # Docker 컨테이너에는 설치되어 있으므로 IDE 경고 무시
+    import torch as th  # pyright: ignore[reportMissingImports]
+    from demucs import pretrained  # pyright: ignore[reportMissingImports]
+    from demucs.apply import apply_model  # pyright: ignore[reportMissingImports]
+    from demucs.audio import AudioFile, save_audio  # pyright: ignore[reportMissingImports]
+    
+    temp_input_path = None
+    temp_output_dir = None
+    
+    try:
+        # 임시 디렉토리 생성
+        os.makedirs(TEMP_UPLOAD_FOLDER, exist_ok=True)
+        os.makedirs(TEMP_OUTPUT_FOLDER, exist_ok=True)
+        
+        # 1. 입력 파일을 임시 저장
+        temp_input_path = os.path.join(TEMP_UPLOAD_FOLDER, unique_filename)
+        with open(temp_input_path, 'wb') as f:
+            f.write(file_data)
+        
+        # 2. 출력 디렉토리 생성
+        temp_output_dir = os.path.join(TEMP_OUTPUT_FOLDER, separated_folder)
+        os.makedirs(temp_output_dir, exist_ok=True)
+        
+        # 3. demucs 모델 로드 및 실행
+        print(f"Loading demucs model...")
+        device = th.device('cuda') if th.cuda.is_available() else th.device('cpu')
+        print(f"Using device: {device}")
+        
+        model = pretrained.get_model(name='htdemucs_ft')
+        model.to(device)
+        model.eval()
+        
+        # 4. 오디오 파일 읽기
+        print(f"Reading audio file: {temp_input_path}")
+        audio_file_obj = AudioFile(temp_input_path)
+        mix = audio_file_obj.read(
+            samplerate=model.samplerate,
+            channels=model.audio_channels
+        )
+        
+        if mix.numel() == 0:
+            raise ValueError(f"입력 오디오 파일이 비어있거나 손상되었습니다.")
+        
+        mix = mix.to(device)
+        
+        # 배치 차원 추가
+        if mix.ndim == 2:
+            mix = mix[None]
+        elif mix.ndim != 3:
+            raise ValueError(f"입력 오디오 텐서 차원 오류: {mix.ndim}차원 (예상: 2D 또는 3D)")
+        
+        if len(mix.shape) != 3:
+            raise ValueError(f"처리 후 mix 텐서가 3차원 (batch, channels, samples)을 가져야 하지만, {len(mix.shape)}차원과 형태 {mix.shape}를 가집니다. 현재 mix 형태는 {mix.shape}입니다. 이는 입력 오디오 파일 또는 Demucs.AudioFile.read()에서 로드하는 데 문제가 있음을 나타냅니다.")
+        
+        # 5. 소스 분리 실행
+        print(f"Separating audio sources...")
+        separated_stems = apply_model(model, mix, shifts=3, progress=False, device=device)[0]
+        
+        # 6. vocal과 MR 추출
+        vocal_idx = model.sources.index('vocals')
+        vocal_tensor = separated_stems[vocal_idx]
+        
+        mr_indices = [i for i, s in enumerate(model.sources) if s != 'vocals']
+        mr_tensor = separated_stems[mr_indices].sum(dim=0)
+        
+        # 7. 임시 파일로 저장
+        temp_vocal_path = os.path.join(temp_output_dir, 'vocal.wav')
+        temp_mr_path = os.path.join(temp_output_dir, 'mr.wav')
+        
+        save_audio(vocal_tensor.cpu(), temp_vocal_path, samplerate=model.samplerate, bits_per_sample=16)
+        save_audio(mr_tensor.cpu(), temp_mr_path, samplerate=model.samplerate, bits_per_sample=16)
+        
+        print(f"Audio separation completed")
+        
+        # 8. MinIO에 업로드
+        saved_files = {
+            'vocal_minio_url': None,
+            'vocal_object_name': None,
+            'mr_minio_url': None
+        }
+        
+        # vocal 파일 업로드
+        with open(temp_vocal_path, 'rb') as f:
+            vocal_data = f.read()
+        
+        vocal_object_name = f"{separated_folder}/vocal.wav"
+        minio_client.put_object(
+            SEPARATED_BUCKET,
+            vocal_object_name,
+            BytesIO(vocal_data),
+            len(vocal_data),
+            content_type='audio/wav'
+        )
+        saved_files['vocal_minio_url'] = f"{MINIO_PUBLIC_ENDPOINT}/{SEPARATED_BUCKET}/{vocal_object_name}"
+        saved_files['vocal_object_name'] = vocal_object_name
+        print(f"Uploaded vocal to MinIO: {vocal_object_name}")
+        
+        # MR 파일 업로드
+        with open(temp_mr_path, 'rb') as f:
+            mr_data = f.read()
+        
+        mr_object_name = f"{separated_folder}/mr.wav"
+        minio_client.put_object(
+            SEPARATED_BUCKET,
+            mr_object_name,
+            BytesIO(mr_data),
+            len(mr_data),
+            content_type='audio/wav'
+        )
+        saved_files['mr_minio_url'] = f"{MINIO_PUBLIC_ENDPOINT}/{SEPARATED_BUCKET}/{mr_object_name}"
+        print(f"Uploaded MR to MinIO: {mr_object_name}")
+        
+        return saved_files
+        
+    finally:
+        # 9. 임시 파일 정리
+        try:
+            if temp_input_path and os.path.exists(temp_input_path):
+                os.remove(temp_input_path)
+            if temp_output_dir and os.path.exists(temp_output_dir):
+                import shutil
+                shutil.rmtree(temp_output_dir)
+        except Exception as e:
+            print(f"Failed to clean up temp files: {str(e)}")
 

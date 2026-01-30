@@ -1,39 +1,247 @@
-# ===================================
-# 루트 .dockerignore (예비용)
-# ===================================
-# 현재 모든 서비스는 각자의 폴더를 context로 사용하므로
-# 이 파일은 실제로 사용되지 않습니다.
-# 
-# - client: context: ./client → client/.dockerignore 사용
-# - api: context: ./api → api/.dockerignore 사용
-#
-# 향후 루트를 context로 사용하는 서비스 추가 시를 위한
-# 기본 공통 규칙만 포함합니다.
-# ===================================
-
-# Git
-.git
+# ========================================
+# 버전 관리 시스템
+# ========================================
+.git/
 .gitignore
 .gitattributes
 
-# Docker 관련
+# ========================================
+# Docker 관련 파일 (빌드 시 불필요)
+# ========================================
 docker-compose*.yml
-*.dockerfile
+Dockerfile*
+.dockerignore
 
-# 환경 변수
+# ========================================
+# 문서 파일
+# ========================================
+*.md
+README*
+LICENSE*
+DOCKER_GUIDE.md
+VEXFLOW_GUIDE.md
+
+# ========================================
+# IDE 및 에디터
+# ========================================
+.vscode/
+.cursor/
+.idea/
+*.iml
+*.iws
+*.ipr
+*.sublime-project
+*.sublime-workspace
+*.swp
+*.swo
+*~
+
+# ========================================
+# Python
+# ========================================
+# 가상 환경
+api/venv/
+api/env/
+api/.venv/
+venv/
+env/
+.venv/
+
+# Python 캐시 및 컴파일 파일
+**/__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# 배포 관련
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# 테스트 및 커버리지
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+nosetests.xml
+coverage.xml
+*.cover
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# pyenv
+.python-version
+
+# ========================================
+# Node.js / Next.js
+# ========================================
+# 의존성
+client/node_modules/
+node_modules/
+
+# Next.js 빌드 출력
+client/.next/
+client/out/
+.next/
+out/
+
+# 프로덕션 빌드
+client/build/
+client/dist/
+
+# 캐시
+client/.cache/
+.cache/
+
+# 로그
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# Vercel
+.vercel
+
+# Turbopack
+.turbo
+
+# ========================================
+# 환경 변수 및 설정 파일
+# ========================================
 .env
 .env.local
+.env.production
 .env.*.local
+*.env
+client/.env
+client/.env.local
+client/.env.production.local
+client/.env.development.local
 
-# 문서
-README.md
-*.md
+# ========================================
+# 파일서버 데이터 (볼륨으로 마운트됨)
+# ========================================
+fileserver/data/*
+!fileserver/data/.gitkeep
 
-# OS 파일
-.DS_Store
-Thumbs.db
-Desktop.ini
-
+# ========================================
 # 임시 파일
+# ========================================
+api/tmp/
+api/temp/
+tmp/
+temp/
 *.tmp
+*.temp
+
+# ========================================
+# OS 관련
+# ========================================
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
+
+# Linux
+*~
+
+# ========================================
+# 로그 파일
+# ========================================
 *.log
+logs/
+*.log.*
+
+# ========================================
+# 백업 파일
+# ========================================
+*.bak
+*.backup
+*.old
+*.orig
+
+# ========================================
+# 데이터베이스
+# ========================================
+*.sqlite
+*.sqlite3
+*.db
+
+# ========================================
+# SSL/TLS 인증서
+# ========================================
+*.pem
+*.key
+*.crt
+*.cer
+*.p12
+*.pfx
+
+# ========================================
+# 압축 파일
+# ========================================
+*.zip
+*.tar.gz
+*.rar
+
+# ========================================
+# 미디어 파일 (테스트 파일)
+# ========================================
+*.mp3
+*.wav
+*.flac
+*.ogg
+*.mp4
+*.avi
+*.mov
+
+# ========================================
+# Nginx 설정 (필요한 것만 포함)
+# ========================================
+nginx/
+
+# ========================================
+# API 스펙 파일 (빌드 시 불필요)
+# ========================================
+client/api.json
+client/api_v1.json
+

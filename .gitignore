@@ -1,220 +1,236 @@
-# ===================================
+# ========================================
+# 환경 변수 및 설정 파일
+# ========================================
+.env
+.env.local
+.env.production
+.env.*.local
+*.env
+
+# ========================================
 # Python
-# ===================================
-**/venv/
-**/.venv/
+# ========================================
+# 가상 환경
 api/venv/
+api/env/
+api/.venv/
+venv/
+env/
+.venv/
+
+# Python 캐시 및 컴파일 파일
 **/__pycache__/
-**/*.py[cod]
-**/*.pyo
-**/*.pyd
-**/.pytest_cache/
-*.egg-info/
-dist/
-build/
-*.egg
+*.py[cod]
+*$py.class
+*.so
 .Python
-pip-log.txt
-pip-delete-this-directory.txt
-.tox/
+
+# 배포 관련
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# PyInstaller
+*.manifest
+*.spec
+
+# 테스트 및 커버리지
+.pytest_cache/
 .coverage
 .coverage.*
 htmlcov/
-.mypy_cache/
-.dmypy.json
-dmypy.json
-*.pyc
-*.whl
-.python-version
-__pypackages__/
+.tox/
+nosetests.xml
+coverage.xml
+*.cover
 
-# ===================================
-# Node.js
-# ===================================
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# pyenv
+.python-version
+
+# ========================================
+# Node.js / Next.js
+# ========================================
+# 의존성
+client/node_modules/
 node_modules/
+
+# Next.js 빌드 출력
+client/.next/
+client/out/
+.next/
+out/
+
+# 프로덕션 빌드
+client/build/
+client/dist/
+
+# 캐시
+client/.cache/
+.cache/
+
+# 로그
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-.pnpm-debug.log*
 lerna-debug.log*
+.pnpm-debug.log*
 
-# Next.js
-.next/
-out/
-dist/
-build/
-.vercel
-.turbo
-
-# TypeScript
-*.tsbuildinfo
-next-env.d.ts
-
-# 의존성 잠금 파일 (선택적 - 팀 정책에 따라)
-# package-lock.json
-# yarn.lock
-# pnpm-lock.yaml
-
-# ===================================
-# Environment variables
-# ===================================
-.env
-.env.local
-.env.*.local
-.env.development.local
-.env.test.local
-.env.production.local
-!.env.example
-
-# 클라이언트 환경 변수 파일들
+# 환경 변수
 client/.env
 client/.env.local
-client/.env.*.local
-
-# ===================================
-# IDE & Editor
-# ===================================
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-.project
-.classpath
-.settings/
-*.sublime-project
-*.sublime-workspace
-
-# ===================================
-# OS
-# ===================================
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
-Desktop.ini
-$RECYCLE.BIN/
-
-# ===================================
-# Docker
-# ===================================
-docker-compose.override.yml
-volumes/
-*.dockerignore.backup
-.docker/
-*.docker.tar
-docker-compose.*.override.yml
-
-# Docker 볼륨 데이터
-.docker-volumes/
-
-# ===================================
-# Nginx
-# ===================================
-nginx/logs/
-nginx/*.log
-nginx/conf.d/*.backup
-nginx/cache/
-nginx/run/
-
-# ===================================
-# SSL/TLS Certificates
-# ===================================
-*.pem
-*.key
-*.crt
-*.csr
-*.cer
-*.p12
-*.pfx
-
-# ===================================
-# 파일 서버 데이터 (MinIO)
-# ===================================
-fileserver/data/*
-!fileserver/data/.gitkeep
-.minio.sys/
-*.minio.sys
-
-# 업로드된 실제 파일들 (음악 파일)
-fileserver/data/original-tracks/*
-fileserver/data/separated-tracks/*
-!fileserver/data/original-tracks/.gitkeep
-!fileserver/data/separated-tracks/.gitkeep
-
-# ===================================
-# Logs
-# ===================================
-*.log
-logs/
-log/
-*.log.*
-
-# ===================================
-# 임시 & 백업 파일
-# ===================================
-*.tmp
-*.temp
-*.bak
-*.backup
-*.old
-*.orig
-*.swp
-*.swo
-*~
-.cache/
-
-# ===================================
-# 테스트 & 커버리지
-# ===================================
-.pytest_cache/
-.coverage
-coverage.xml
-*.cover
-.hypothesis/
-test-results/
-
-# ===================================
-# 데이터베이스
-# ===================================
-*.db
-*.sqlite
-*.sqlite3
-
-# ===================================
-# 기타
-# ===================================
-*.pid
-*.seed
-*.pid.lock
-.vscode-test
-.pytest_cache/
-.ruff_cache/
-.ipynb_checkpoints/
-
-# ESLint 캐시
-.eslintcache
-
-# Stylelint 캐시
-.stylelintcache
-
-# Next.js 캐시
-.next/cache/
+client/.env.production.local
+client/.env.development.local
 
 # Vercel
 .vercel
 
-# ===================================
-# 음악 파일 (테스트용)
-# ===================================
+# Turbopack
+.turbo
+
+# ========================================
+# Docker
+# ========================================
+# Docker 볼륨 및 데이터
+fileserver/data/*
+!fileserver/data/.gitkeep
+
+# 임시 파일 (API에서 사용)
+api/tmp/
+api/temp/
+/tmp/
+/temp/
+
+# ========================================
+# IDE 및 에디터
+# ========================================
+# VS Code
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+
+# Cursor
+.cursor/
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# PyCharm
+.idea/
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+*.swp
+*.swo
+*~
+
+# ========================================
+# OS 관련
+# ========================================
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
+
+# Linux
+*~
+
+# ========================================
+# 로그 파일
+# ========================================
+*.log
+logs/
+*.log.*
+
+# ========================================
+# 백업 파일
+# ========================================
+*.bak
+*.backup
+*.old
+*.orig
+*.tmp
+
+# ========================================
+# 데이터베이스
+# ========================================
+*.sqlite
+*.sqlite3
+*.db
+
+# ========================================
+# SSL/TLS 인증서
+# ========================================
+*.pem
+*.key
+*.crt
+*.cer
+*.p12
+*.pfx
+
+# Let's Encrypt (Certbot이 생성하는 파일들은 필요시 별도 관리)
+# /var/www/certbot/ 는 Docker 볼륨으로 관리되므로 제외
+
+# ========================================
+# 기타
+# ========================================
+# 압축 파일
+*.zip
+*.tar.gz
+*.rar
+
+# 미디어 파일 (대용량 테스트 파일)
 *.mp3
 *.wav
 *.flac
-*.m4a
 *.ogg
-*.aac
-!test_samples/*.mp3
-!test_samples/*.wav
+*.mp4
+*.avi
+*.mov
+

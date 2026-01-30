@@ -8,7 +8,6 @@ services:
     volumes:
       - ./nginx/html:/usr/share/nginx/html
       - ./nginx/conf.d/production-http.conf:/etc/nginx/conf.d/default.conf  # 배포용 설정만 로드
-      - /var/www/certbot:/var/www/certbot  # Let's Encrypt용
     environment:
       - TZ=Asia/Seoul
     restart: unless-stopped
@@ -24,13 +23,11 @@ services:
       context: ./client
       dockerfile: Dockerfile.prod  # 프로덕션 Dockerfile 사용
     container_name: my-pitch-client
-    ports:
-      - "3000:3000"
     environment:
       # API URL (.env에서 변경 가능, 기본값: api 서브도메인 사용)
       - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://api.my-pitch.work}
       # 파일 업로드 설정
-      - NEXT_PUBLIC_MAX_FILE_SIZE_MB=${MAX_FILE_SIZE_MB:-30}
+      - NEXT_PUBLIC_MAX_FILE_SIZE_MB=${MAX_FILE_SIZE_MB:-7}
       - NODE_ENV=production
       - TZ=Asia/Seoul
     restart: unless-stopped
@@ -42,21 +39,17 @@ services:
       context: ./api
       dockerfile: Dockerfile.prod  # 프로덕션 Dockerfile 사용
     container_name: my-pitch-api
-    expose:
-      - "5000"  # 내부 네트워크에만 노출
     environment:
       # MinIO 설정
       - MINIO_ENDPOINT=${MINIO_ENDPOINT:-fileserver:9000}
-      - MINIO_PUBLIC_ENDPOINT=${MINIO_PUBLIC_ENDPOINT:-http://my-pitch.work/files}
+      - MINIO_PUBLIC_ENDPOINT=${MINIO_PUBLIC_ENDPOINT:-http://files.my-pitch.work}
       - MINIO_ROOT_USER=${MINIO_ROOT_USER:-minioadmin}
       - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD:-minioadmin}
       # 버킷 설정
       - ORIGINAL_BUCKET=${ORIGINAL_BUCKET:-original-tracks}
       - SEPARATED_BUCKET=${SEPARATED_BUCKET:-separated-tracks}
       # 파일 업로드 설정
-      - MAX_FILE_SIZE_MB=${MAX_FILE_SIZE_MB:-30}
-      # 외부 분석 서버
-      - ANALYSIS_SERVER_URL=${ANALYSIS_SERVER_URL:-https://melinda-subtemperate-grace.ngrok-free.dev}
+      - MAX_FILE_SIZE_MB=${MAX_FILE_SIZE_MB:-7}
       - FLASK_ENV=production
       - TZ=Asia/Seoul
     restart: unless-stopped
@@ -68,11 +61,7 @@ services:
   fileserver:
     image: minio/minio:latest
     container_name: my-pitch-fileserver
-    ports:
-      - "9000:9000"  # API 포트 (API 서버 접근용)
-      - "9001:9001"  # 웹 UI 포트 (관리용)
     environment:
-      # MinIO 관리자 계정 (.env에서 변경 가능)
       - MINIO_ROOT_USER=${MINIO_ROOT_USER:-minioadmin}
       - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD:-minioadmin}
       - TZ=Asia/Seoul

@@ -6,16 +6,17 @@ import os
 from config import (
     MINIO_PUBLIC_ENDPOINT,
     ORIGINAL_BUCKET,
-    MAX_FILE_SIZE_MB
+    MAX_FILE_SIZE_MB,
+    USE_EXTERNAL_SEPARATOR
 )
 from validators import validate_uploaded_file
 from services import (
     save_uploaded_file,
     send_file_to_analysis_server,
     analyze_vocal_pitch_from_minio,
-    download_and_save_separated_files
+    download_and_save_separated_files,
+    separate_audio_locally
 )
-from utils import determine_clef
 from storage import setup_storage
 
 app = Flask(__name__)
@@ -40,7 +41,7 @@ def hello_world():
         'message': 'Hello World',
     })
 
-@app.route('/v1/tracks/analyze', methods=['POST'])
+@app.route('/tracks/analyze', methods=['POST'])
 def analyze_track():
     # 1. 파일 유효성 검사
     file, error = validate_uploaded_file('music_file')
@@ -55,30 +56,40 @@ def analyze_track():
         file_info = save_uploaded_file(file, minio_client, ORIGINAL_BUCKET)
         
         try:
-            # 3. 분석 서버로 파일 전송
-            analysis_result = send_file_to_analysis_server(
-                file_info['file_data'],
-                file_info['unique_filename'],
-                file_info['content_type']
-            )
-            
-            # 4. 분리된 파일 다운로드 및 MinIO에 저장
-            saved_files = download_and_save_separated_files(
-                analysis_result,
-                file_info['separated_folder'],
-                minio_client
-            )
+            # 3. 음원 분리 (환경 변수에 따라 분기)
+            if USE_EXTERNAL_SEPARATOR:
+                # 개발 환경: 외부 서버(Colab)로 요청
+                print("Using external separator (Colab server)")
+                analysis_result = send_file_to_analysis_server(
+                    file_info['file_data'],
+                    file_info['unique_filename'],
+                    file_info['content_type']
+                )
+                saved_files = download_and_save_separated_files(
+                    analysis_result,
+                    file_info['separated_folder'],
+                    minio_client
+                )
+            else:
+                # 배포 환경: 로컬에서 demucs 직접 실행
+                print("Using local demucs separator")
+                saved_files = separate_audio_locally(
+                    file_info['file_data'],
+                    file_info['unique_filename'],
+                    file_info['separated_folder'],
+                    minio_client
+                )
                 
-            # 5. 음정 분석
+            # 4. 음정 분석
             pitch_data = None
             if saved_files.get('vocal_object_name'):
                 pitch_data = analyze_vocal_pitch_from_minio(saved_files['vocal_object_name'], minio_client)
 
-            # 6. 클레프 결정 (사용자가 선택한 vocal_type 기반)
+            # 5. 클레프 결정 (사용자가 선택한 vocal_type 기반)
             # female → treble, male → bass
             clef = 'treble' if vocal_type == 'female' else 'bass'
 
-            # 7. 응답 데이터 구성
+            # 6. 응답 데이터 구성
             filename_without_ext = os.path.splitext(file_info['original_filename'])[0]
             response_data = {
                 'clef': clef,
@@ -90,8 +101,10 @@ def analyze_track():
             return jsonify(response_data), 200
             
         except Exception as e:
+            error_msg = '파일은 저장되었으나 음원 분리 실패' if USE_EXTERNAL_SEPARATOR else '파일은 저장되었으나 로컬 음원 분리 실패'
             return jsonify({
-                'message': '파일은 저장되었으나 분석 서버 전송 실패',
+                'message': error_msg,
+                'error': str(e)
             }), 502
     
     except S3Error as e:

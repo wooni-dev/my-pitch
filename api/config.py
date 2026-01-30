@@ -12,8 +12,17 @@ SEPARATED_BUCKET = os.environ.get('SEPARATED_BUCKET', 'separated-tracks')  # voc
 
 # 파일 업로드 설정 (demucs 호환 형식만 지원)
 ALLOWED_EXTENSIONS = {'wav', 'mp3', 'flac', 'ogg'}
-MAX_FILE_SIZE_MB = int(os.environ.get('MAX_FILE_SIZE_MB', '30'))
+MAX_FILE_SIZE_MB = int(os.environ.get('MAX_FILE_SIZE_MB', '7'))
 
-# 외부 API 서버 설정
+# 외부 API 서버 설정 (개발 환경용)
 ANALYSIS_SERVER_URL = os.environ.get('ANALYSIS_SERVER_URL', 'https://6e37648a7e67ec.lhr.life')
+
+# 음원 분리 방식 설정
+# True: 외부 서버(Colab) 사용 (개발 환경)
+# False: 로컬에서 demucs 직접 실행 (배포 환경)
+USE_EXTERNAL_SEPARATOR = os.environ.get('USE_EXTERNAL_SEPARATOR', 'false').lower() == 'true'
+
+# 로컬 demucs 실행 시 임시 파일 저장 경로
+TEMP_UPLOAD_FOLDER = os.environ.get('TEMP_UPLOAD_FOLDER', '/tmp/uploads')
+TEMP_OUTPUT_FOLDER = os.environ.get('TEMP_OUTPUT_FOLDER', '/tmp/outputs')
 

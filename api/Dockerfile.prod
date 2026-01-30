@@ -14,9 +14,9 @@ RUN apt-get update && apt-get install -y \
     libsndfile1 \
     && rm -rf /var/lib/apt/lists/*
 
-# requirements.txt 복사 및 패키지 설치
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# requirements 파일들 복사 및 패키지 설치
+COPY requirements*.txt ./
+RUN pip install --no-cache-dir -r requirements-prod.txt
 
 # 애플리케이션 코드 복사
 COPY . .
@@ -25,8 +25,6 @@ COPY . .
 EXPOSE 5000
 
 # Gunicorn으로 Flask 애플리케이션 실행
-# --workers: CPU 코어 수 * 2 + 1 권장 (여기서는 4개)
-# --timeout: 요청 타임아웃 (오디오 처리 시간 고려하여 300초)
-# --bind: 모든 인터페이스에서 5000 포트로 바인딩
-CMD ["gunicorn", "--workers", "4", "--timeout", "300", "--bind", "0.0.0.0:5000", "app:app"]
+# gunicorn.conf.py 설정 파일 사용
+CMD ["gunicorn", "--config", "gunicorn.conf.py", "app:app"]
 

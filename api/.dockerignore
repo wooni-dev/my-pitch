@@ -1,23 +1,67 @@
-# Python 가상환경
-venv/
-.venv/
-env/
-ENV/
-.python-version
+# ========================================
+# 버전 관리 시스템
+# ========================================
+.git/
+.gitignore
+.gitattributes
 
-# Python 캐시 및 빌드
+# ========================================
+# Docker 관련 파일 (빌드 시 불필요)
+# ========================================
+Dockerfile*
+.dockerignore
+
+# ========================================
+# 문서 파일
+# ========================================
+*.md
+README*
+
+# ========================================
+# IDE 및 에디터
+# ========================================
+.vscode/
+.cursor/
+.idea/
+*.iml
+*.swp
+*.swo
+*~
+
+# ========================================
+# Python
+# ========================================
+# 가상 환경 (Docker 빌드 중에 생성됨)
+venv/
+env/
+.venv/
+ENV/
+.env/
+
+# Python 캐시 및 컴파일 파일
 __pycache__/
 *.py[cod]
-*.pyo
-*.pyd
 *$py.class
 *.so
 .Python
-*.egg-info/
-*.egg
-dist/
+
+# 배포 관련
 build/
-pip-log.txt
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
 
 # 테스트 및 커버리지
 .pytest_cache/
@@ -25,54 +69,105 @@ pip-log.txt
 .coverage.*
 htmlcov/
 .tox/
+nosetests.xml
+coverage.xml
+*.cover
 .hypothesis/
+.cache
 
-# 환경 변수
-.env
-.env.local
-.env.*.local
-
-# 로그
-*.log
-logs/
-
-# IDE 설정
-.vscode/
-.idea/
-*.swp
-*.swo
-
-# OS 파일
-.DS_Store
-Thumbs.db
-
-# Git
-.git/
-.gitignore
-
-# Docker 관련
-Dockerfile
-.dockerignore
-docker-compose.yml
-
-# 문서
-README.md
-*.md
-LOCAL_DEV_SETUP.md
-
-# 임시 파일
-*.tmp
-*.temp
-*.bak
-
-# Jupyter
-.ipynb_checkpoints/
+# Jupyter Notebook
+.ipynb_checkpoints
 *.ipynb
 
-# 음악 파일 (큰 파일 제외)
+# pyenv
+.python-version
+
+# MyPy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre
+.pyre/
+
+# ========================================
+# 환경 변수 및 설정 파일
+# ========================================
+.env
+.env.local
+.env.production
+.env.*.local
+*.env
+
+# ========================================
+# 임시 및 데이터 파일
+# ========================================
+tmp/
+temp/
+*.tmp
+*.temp
+data/
+uploads/
+
+# ========================================
+# 로그 파일
+# ========================================
+*.log
+logs/
+*.log.*
+
+# ========================================
+# OS 관련
+# ========================================
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Windows
+Thumbs.db
+ehthumbs.db
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# Linux
+*~
+
+# ========================================
+# 백업 파일
+# ========================================
+*.bak
+*.backup
+*.old
+*.orig
+
+# ========================================
+# 데이터베이스
+# ========================================
+*.sqlite
+*.sqlite3
+*.db
+
+# ========================================
+# SSL/TLS 인증서
+# ========================================
+*.pem
+*.key
+*.crt
+*.cer
+*.p12
+*.pfx
+
+# ========================================
+# 미디어 파일 (테스트 파일)
+# ========================================
 *.mp3
 *.wav
 *.flac
-*.m4a
 *.ogg
+*.mp4
+*.avi
+*.mov
 
