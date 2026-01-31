@@ -230,9 +230,10 @@ def separate_audio_locally(file_data: bytes, unique_filename: str, separated_fol
     # 배포 환경에서만 사용되는 패키지 (로컬 개발 환경에는 설치되지 않음)
     # Docker 컨테이너에는 설치되어 있으므로 IDE 경고 무시
     import torch as th  # pyright: ignore[reportMissingImports]
+    import soundfile as sf  # pyright: ignore[reportMissingImports]
     from demucs import pretrained  # pyright: ignore[reportMissingImports]
     from demucs.apply import apply_model  # pyright: ignore[reportMissingImports]
-    from demucs.audio import AudioFile, save_audio  # pyright: ignore[reportMissingImports]
+    from demucs.audio import AudioFile  # pyright: ignore[reportMissingImports]
     
     temp_input_path = None
     temp_output_dir = None
@@ -297,8 +298,13 @@ def separate_audio_locally(file_data: bytes, unique_filename: str, separated_fol
         temp_vocal_path = os.path.join(temp_output_dir, 'vocal.wav')
         temp_mr_path = os.path.join(temp_output_dir, 'mr.wav')
         
-        save_audio(vocal_tensor.cpu(), temp_vocal_path, samplerate=model.samplerate, bits_per_sample=16)
-        save_audio(mr_tensor.cpu(), temp_mr_path, samplerate=model.samplerate, bits_per_sample=16)
+        # soundfile을 사용하여 저장 (torchcodec 의존성 제거)
+        # tensor를 numpy 배열로 변환 (channels, samples) -> (samples, channels)
+        vocal_numpy = vocal_tensor.cpu().numpy().T
+        mr_numpy = mr_tensor.cpu().numpy().T
+        
+        sf.write(temp_vocal_path, vocal_numpy, model.samplerate, subtype='PCM_16')
+        sf.write(temp_mr_path, mr_numpy, model.samplerate, subtype='PCM_16')
         
         print(f"Audio separation completed")
         
