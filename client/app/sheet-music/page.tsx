@@ -26,63 +26,17 @@ export default function SheetMusicPage() {
   // 악보 데이터 로드
   const [sheetMusicData, dataLoaded, loadError] = useSheetMusicData<ApiSheetMusicData>();
   
-  // 데이터 로딩 에러 처리
-  if (dataLoaded && loadError) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-black font-sans">
-        <div className="max-w-md w-full mx-4 bg-white dark:bg-zinc-900 rounded-2xl p-8 shadow-2xl border border-zinc-200 dark:border-zinc-800">
-          <div className="text-center space-y-4">
-            <svg 
-              className="w-16 h-16 mx-auto text-red-500" 
-              fill="none" 
-              stroke="currentColor" 
-              viewBox="0 0 24 24"
-            >
-              <path 
-                strokeLinecap="round" 
-                strokeLinejoin="round" 
-                strokeWidth={2} 
-                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" 
-              />
-            </svg>
-            <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">
-              데이터 로드 실패
-            </h2>
-            <p className="text-sm text-zinc-600 dark:text-zinc-400">
-              {loadError}
-            </p>
-            <button
-              onClick={() => router.push('/')}
-              className="w-full mt-4 px-4 py-3 bg-black text-white dark:bg-white dark:text-black rounded-lg font-medium hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors cursor-pointer"
-            >
-              홈으로 돌아가기
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-  
-  // 데이터가 없으면 로딩 표시
-  if (!sheetMusicData) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-black font-sans">
-        <div className="text-white">로딩 중...</div>
-      </div>
-    );
-  }
-  
   // 제목 추출 (original_filename에서 확장자 제거)
   const apiData = sheetMusicData;
-  const title = apiData.original_filename 
+  const title = apiData?.original_filename 
     ? apiData.original_filename.replace(/\.(mp3|wav|m4a)$/i, '') 
     : '악보';
   
   // 오디오 URL 추출
-  const audioUrl = apiData.file_url || '';
+  const audioUrl = apiData?.file_url || '';
   
   // clef에 따른 하이라이트 색상 설정
-  const highlightColors = apiData.clef === 'bass' 
+  const highlightColors = apiData?.clef === 'bass' 
     ? { fill: '#3B82F6', stroke: '#2563EB' } // 남성 보컬 (파란색)
     : { fill: '#EC4899', stroke: '#DB2777' }; // 여성 보컬 (핑크색)
   
@@ -279,7 +233,7 @@ export default function SheetMusicPage() {
 
   // VexFlow로 악보 그리기
   useEffect(() => {
-    if (!dataLoaded || !containerRef.current) return;
+    if (!dataLoaded || !containerRef.current || !apiData) return;
 
     // 기존 SVG 제거
     containerRef.current.innerHTML = '';
@@ -387,7 +341,53 @@ export default function SheetMusicPage() {
     } catch (error) {
       console.error('VexFlow 렌더링 오류:', error);
     }
-  }, [dataLoaded, resizeTrigger, sheetMusicData]);
+  }, [dataLoaded, resizeTrigger, sheetMusicData, apiData]);
+
+  // 데이터 로딩 에러 처리
+  if (dataLoaded && loadError) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-black font-sans">
+        <div className="max-w-md w-full mx-4 bg-white dark:bg-zinc-900 rounded-2xl p-8 shadow-2xl border border-zinc-200 dark:border-zinc-800">
+          <div className="text-center space-y-4">
+            <svg 
+              className="w-16 h-16 mx-auto text-red-500" 
+              fill="none" 
+              stroke="currentColor" 
+              viewBox="0 0 24 24"
+            >
+              <path 
+                strokeLinecap="round" 
+                strokeLinejoin="round" 
+                strokeWidth={2} 
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" 
+              />
+            </svg>
+            <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">
+              데이터 로드 실패
+            </h2>
+            <p className="text-sm text-zinc-600 dark:text-zinc-400">
+              {loadError}
+            </p>
+            <button
+              onClick={() => router.push('/')}
+              className="w-full mt-4 px-4 py-3 bg-black text-white dark:bg-white dark:text-black rounded-lg font-medium hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors cursor-pointer"
+            >
+              홈으로 돌아가기
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  
+  // 데이터가 없으면 로딩 표시
+  if (!sheetMusicData) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-black font-sans">
+        <div className="text-white">로딩 중...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-black font-sans">
