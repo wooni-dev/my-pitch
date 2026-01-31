@@ -297,8 +297,9 @@ def separate_audio_locally(file_data: bytes, unique_filename: str, separated_fol
         temp_vocal_path = os.path.join(temp_output_dir, 'vocal.wav')
         temp_mr_path = os.path.join(temp_output_dir, 'mr.wav')
         
-        save_audio(vocal_tensor.cpu(), temp_vocal_path, samplerate=model.samplerate, bits_per_sample=16)
-        save_audio(mr_tensor.cpu(), temp_mr_path, samplerate=model.samplerate, bits_per_sample=16)
+        # backend='soundfile'을 명시하여 torchcodec 없이도 저장 가능
+        save_audio(vocal_tensor.cpu(), temp_vocal_path, samplerate=model.samplerate, bits_per_sample=16, backend='soundfile')
+        save_audio(mr_tensor.cpu(), temp_mr_path, samplerate=model.samplerate, bits_per_sample=16, backend='soundfile')
         
         print(f"Audio separation completed")
         
