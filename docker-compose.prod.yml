@@ -38,6 +38,7 @@ services:
     build:
       context: ./api
       dockerfile: Dockerfile.prod  # 프로덕션 Dockerfile 사용
+      shm_size: '2gb'  # 공유 메모리 크기 증가 (PyTorch용)
     container_name: my-pitch-api
     environment:
       # MinIO 설정

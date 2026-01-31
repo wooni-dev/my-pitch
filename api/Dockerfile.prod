@@ -6,17 +6,26 @@ WORKDIR /app
 # 프로덕션 환경 설정
 ENV PYTHONUNBUFFERED=1
 ENV FLASK_ENV=production
+ENV PIP_NO_CACHE_DIR=1
 
 # 시스템 패키지 업데이트 및 필요한 패키지 설치
 # ffmpeg는 demucs와 librosa가 오디오 처리에 필요
 RUN apt-get update && apt-get install -y \
     ffmpeg \
     libsndfile1 \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get clean
 
 # requirements 파일들 복사 및 패키지 설치
 COPY requirements*.txt ./
-RUN pip install --no-cache-dir -r requirements-prod.txt
+
+# 단계별로 설치하여 디스크 공간 절약
+RUN pip install --no-cache-dir torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118 \
+    && pip cache purge
+
+RUN pip install --no-cache-dir -r requirements-prod.txt \
+    && pip cache purge \
+    && find /usr/local/lib/python3.11/site-packages -type d -name '__pycache__' -exec rm -rf {} + 2>/dev/null || true
 
 # 애플리케이션 코드 복사
 COPY . .
