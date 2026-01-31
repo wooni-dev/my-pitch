@@ -59,6 +59,8 @@ services:
       - SEPARATED_BUCKET=${SEPARATED_BUCKET:-separated-tracks}
       # 파일 업로드 설정
       - MAX_FILE_SIZE_MB=${MAX_FILE_SIZE_MB:-7}
+      # 음원 분리 방식 (개발 환경: 외부 서버 사용)
+      - USE_EXTERNAL_SEPARATOR=${USE_EXTERNAL_SEPARATOR:-True}
       # 외부 분석 서버 (ngrok 주소 - .env에서 변경 가능)
       - ANALYSIS_SERVER_URL=${ANALYSIS_SERVER_URL:-https://melinda-subtemperate-grace.ngrok-free.dev}
       - TZ=Asia/Seoul
@@ -73,9 +75,6 @@ services:
   fileserver:
     image: minio/minio:latest
     container_name: my-pitch-fileserver
-    ports:
-      - "9000:9000"  # API 포트
-      - "9001:9001"  # 웹 UI 포트
     environment:
       # MinIO 관리자 계정 (.env에서 변경 가능, 기본값: minioadmin)
       - MINIO_ROOT_USER=${MINIO_ROOT_USER:-minioadmin}
