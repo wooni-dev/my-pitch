@@ -17,7 +17,7 @@ from services import (
     download_and_save_separated_files,
     separate_audio_locally
 )
-from storage import setup_storage
+from storage import setup_storage, generate_presigned_url
 
 app = Flask(__name__)
 CORS(app)
@@ -91,10 +91,19 @@ def analyze_track():
 
             # 6. 응답 데이터 구성
             filename_without_ext = os.path.splitext(file_info['original_filename'])[0]
+            
+            # Presigned URL 생성 (24시간 동안 유효)
+            file_presigned_url = generate_presigned_url(
+                minio_client,
+                ORIGINAL_BUCKET,
+                file_info['unique_filename'],
+                expires_hours=24
+            )
+            
             response_data = {
                 'clef': clef,
                 'original_filename': filename_without_ext,
-                'file_url': f"{MINIO_PUBLIC_ENDPOINT}/{ORIGINAL_BUCKET}/{file_info['unique_filename']}",
+                'file_url': file_presigned_url,  # Presigned URL 사용
                 'notes': pitch_data
             }
             

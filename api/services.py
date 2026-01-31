@@ -6,13 +6,13 @@ from io import BytesIO
 from minio import Minio
 
 from config import (
-    MINIO_PUBLIC_ENDPOINT,
     ANALYSIS_SERVER_URL,
     SEPARATED_BUCKET,
     TEMP_UPLOAD_FOLDER,
     TEMP_OUTPUT_FOLDER
 )
 from utils import extract_pitch_info
+from storage import generate_presigned_url
 
 
 def save_uploaded_file(file, minio_client: Minio, bucket_name: str):
@@ -183,7 +183,13 @@ def download_and_save_separated_files(analysis_result: dict, separated_folder: s
             content_type='audio/wav'
         )
         
-        saved_files['vocal_minio_url'] = f"{MINIO_PUBLIC_ENDPOINT}/{SEPARATED_BUCKET}/{vocal_object_name}"
+        # Presigned URL 생성 (24시간 유효)
+        saved_files['vocal_minio_url'] = generate_presigned_url(
+            minio_client,
+            SEPARATED_BUCKET,
+            vocal_object_name,
+            expires_hours=24
+        )
         saved_files['vocal_object_name'] = vocal_object_name  # 피치 분석을 위해 저장
     
     # mr 파일 다운로드 및 저장
@@ -206,7 +212,13 @@ def download_and_save_separated_files(analysis_result: dict, separated_folder: s
             content_type='audio/wav'
         )
         
-        saved_files['mr_minio_url'] = f"{MINIO_PUBLIC_ENDPOINT}/{SEPARATED_BUCKET}/{mr_object_name}"
+        # Presigned URL 생성 (24시간 유효)
+        saved_files['mr_minio_url'] = generate_presigned_url(
+            minio_client,
+            SEPARATED_BUCKET,
+            mr_object_name,
+            expires_hours=24
+        )
     
     return saved_files
 
@@ -327,7 +339,13 @@ def separate_audio_locally(file_data: bytes, unique_filename: str, separated_fol
             len(vocal_data),
             content_type='audio/wav'
         )
-        saved_files['vocal_minio_url'] = f"{MINIO_PUBLIC_ENDPOINT}/{SEPARATED_BUCKET}/{vocal_object_name}"
+        # Presigned URL 생성 (24시간 유효)
+        saved_files['vocal_minio_url'] = generate_presigned_url(
+            minio_client,
+            SEPARATED_BUCKET,
+            vocal_object_name,
+            expires_hours=24
+        )
         saved_files['vocal_object_name'] = vocal_object_name
         print(f"Uploaded vocal to MinIO: {vocal_object_name}")
         
@@ -343,7 +361,13 @@ def separate_audio_locally(file_data: bytes, unique_filename: str, separated_fol
             len(mr_data),
             content_type='audio/wav'
         )
-        saved_files['mr_minio_url'] = f"{MINIO_PUBLIC_ENDPOINT}/{SEPARATED_BUCKET}/{mr_object_name}"
+        # Presigned URL 생성 (24시간 유효)
+        saved_files['mr_minio_url'] = generate_presigned_url(
+            minio_client,
+            SEPARATED_BUCKET,
+            mr_object_name,
+            expires_hours=24
+        )
         print(f"Uploaded MR to MinIO: {mr_object_name}")
         
         return saved_files
