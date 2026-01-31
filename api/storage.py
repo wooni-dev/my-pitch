@@ -5,6 +5,7 @@ import json
 
 from config import (
     MINIO_ENDPOINT,
+    MINIO_PUBLIC_ENDPOINT,
     MINIO_ACCESS_KEY,
     MINIO_SECRET_KEY,
     ORIGINAL_BUCKET,
@@ -74,14 +75,22 @@ def generate_presigned_url(minio_client, bucket_name: str, object_name: str, exp
         expires_hours: URL 만료 시간 (기본 24시간)
     
     Returns:
-        str: Presigned URL
+        str: Presigned URL (외부 접근 가능한 도메인으로 변환)
     """
     try:
+        # MinIO에서 Presigned URL 생성
         url = minio_client.presigned_get_object(
             bucket_name,
             object_name,
             expires=timedelta(hours=expires_hours)
         )
+        
+        # 내부 엔드포인트를 외부 공개 엔드포인트로 교체
+        # 예: http://fileserver:9000 → http://files.my-pitch.work
+        if MINIO_ENDPOINT in url:
+            url = url.replace(f"http://{MINIO_ENDPOINT}", MINIO_PUBLIC_ENDPOINT)
+            url = url.replace(f"https://{MINIO_ENDPOINT}", MINIO_PUBLIC_ENDPOINT)
+        
         return url
     except S3Error as e:
         print(f"Presigned URL 생성 중 오류: {e}")
