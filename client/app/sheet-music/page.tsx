@@ -243,7 +243,8 @@ export default function SheetMusicPage() {
       const stavesData = convertApiDataToStaves(apiData, 4); // 마디당 4박자 (4/4 박자)
       const totalStaveCount = stavesData.length;
       
-      const containerWidth = containerRef.current.clientWidth;
+      // 리사이즈할 때마다 최신 너비를 가져옴
+      const containerWidth = containerRef.current.getBoundingClientRect().width;
       
       // 렌더러 초기화 및 레이아웃 계산
       const { context, stavesPerRow, rows, staveWidth } = initializeRenderer(
@@ -399,7 +400,7 @@ export default function SheetMusicPage() {
           
           <div 
             ref={containerRef} 
-            className="w-full bg-[#c8dae6] overflow-x-auto"
+            className="w-full bg-[#c8dae6]"
           />
           
           {/* 플로팅 오디오 컨트롤 버튼 - 오른쪽 하단 고정 */}
