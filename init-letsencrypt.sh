@@ -70,7 +70,7 @@ fi
 # HTTP 설정으로 임시 변경
 echo -e "${YELLOW}3. HTTP 모드로 Nginx 시작...${NC}"
 cp docker-compose.prod.yml docker-compose.prod.yml.backup  # 백업 생성
-sed -i.tmp 's/production-https.conf/production-http.conf/g' docker-compose.prod.yml  # HTTPS → HTTP 설정으로 변경
+sed -i 's/production-https.conf/production-http.conf/g' docker-compose.prod.yml  # HTTPS → HTTP 설정으로 변경
 
 # nginx만 시작 (의존성 무시 - API/Client 없이 nginx만 실행)
 docker compose -f docker-compose.prod.yml up -d --no-deps nginx
@@ -130,6 +130,4 @@ echo -e "${GREEN}=== SSL 인증서 발급 완료! ===${NC}"
 echo -e "${GREEN}모든 도메인이 HTTPS로 서비스됩니다.${NC}"
 echo -e "${YELLOW}인증서는 자동으로 갱신됩니다. (certbot 컨테이너가 90일마다 자동 처리)${NC}"
 
-# 임시 파일 정리
-rm -f docker-compose.prod.yml.tmp
 
