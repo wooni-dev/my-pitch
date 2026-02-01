@@ -72,8 +72,6 @@ services:
     environment:
       - MINIO_ROOT_USER=${MINIO_ROOT_USER:-minioadmin}
       - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD:-minioadmin}
-      - MINIO_DOMAIN=files.my-pitch.work
-      - MINIO_SERVER_URL=http://files.my-pitch.work
       - TZ=Asia/Seoul
     volumes:
       - ./fileserver/data:/data
