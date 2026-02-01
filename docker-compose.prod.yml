@@ -7,7 +7,9 @@ services:
       - "443:443"
     volumes:
       - ./nginx/html:/usr/share/nginx/html
-      - ./nginx/conf.d/production-http.conf:/etc/nginx/conf.d/default.conf  # 배포용 설정만 로드
+      - ./nginx/conf.d/production-https.conf:/etc/nginx/conf.d/default.conf  # HTTPS 설정 파일
+      - ./certbot/conf:/etc/letsencrypt  # SSL 인증서
+      - ./certbot/www:/var/www/certbot  # Certbot 챌린지용
     environment:
       - TZ=Asia/Seoul
     restart: unless-stopped
@@ -17,6 +19,7 @@ services:
       - fileserver
     networks:
       - my-pitch-network
+    command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"  # 6시간마다 nginx 리로드
 
   client:
     build:
@@ -52,7 +55,7 @@ services:
       - MAX_FILE_SIZE_MB=${MAX_FILE_SIZE_MB:-7}
       - FLASK_ENV=production
       - TZ=Asia/Seoul
-    # GPU 설정
+    # GPU 설정 (VM에 GPU가 있는 경우에만 주석 해제)
     deploy:
       resources:
         reservations:
@@ -79,6 +82,14 @@ services:
     restart: unless-stopped
     networks:
       - my-pitch-network
+
+  certbot:
+    image: certbot/certbot
+    container_name: my-pitch-certbot
+    volumes:
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
 
 networks:
   my-pitch-network:
