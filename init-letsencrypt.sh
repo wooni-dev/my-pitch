@@ -52,10 +52,9 @@ if [ -d "certbot/conf/live/${domains[0]}" ]; then
 fi
 
 # ========================================
-# HTTP 모드로 Nginx 시작 (인증서 발급 준비)
+# Let's Encrypt 전용 임시 Nginx 설정 생성
 # ========================================
-# 임시 Nginx 설정으로 변경 (HTTPS 설정에는 인증서가 필요하므로 HTTP 먼저 시작)
-echo -e "${YELLOW}2. 임시 Nginx 설정으로 변경...${NC}"
+echo -e "${YELLOW}2. Let's Encrypt 전용 임시 Nginx 설정 생성...${NC}"
 if [ ! -f "docker-compose.prod.yml" ]; then
     echo -e "${RED}오류: docker-compose.prod.yml 파일을 찾을 수 없습니다.${NC}"
     exit 1
@@ -67,10 +66,34 @@ if [ "$(docker ps -q -f name=my-pitch-nginx)" ]; then
     docker compose -f docker-compose.prod.yml down
 fi
 
+# Let's Encrypt 인증서 발급 전용 임시 nginx 설정 파일 생성
+cat > nginx/conf.d/certbot-temp.conf << 'EOF'
+# Let's Encrypt 인증서 발급 전용 임시 설정
+# upstream 없이 certbot의 acme-challenge만 처리
+
+server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
+    server_name _;
+
+    # Let's Encrypt 챌린지 경로
+    location /.well-known/acme-challenge/ {
+        root /var/www/certbot;
+    }
+
+    # 나머지 요청은 200 응답
+    location / {
+        return 200 "Let's Encrypt certification in progress...\n";
+        add_header Content-Type text/plain;
+    }
+}
+EOF
+
 # HTTP 설정으로 임시 변경
 echo -e "${YELLOW}3. HTTP 모드로 Nginx 시작...${NC}"
 cp docker-compose.prod.yml docker-compose.prod.yml.backup  # 백업 생성
-sed -i 's/production-https.conf/production-http.conf/g' docker-compose.prod.yml  # HTTPS → HTTP 설정으로 변경
+sed -i 's/production-https.conf/certbot-temp.conf/g' docker-compose.prod.yml  # 임시 설정으로 변경
+sed -i 's/production-http.conf/certbot-temp.conf/g' docker-compose.prod.yml  # 임시 설정으로 변경
 
 # nginx만 시작 (의존성 무시 - API/Client 없이 nginx만 실행)
 docker compose -f docker-compose.prod.yml up -d --no-deps nginx
@@ -120,6 +143,9 @@ done
 # HTTPS 설정으로 변경 (인증서 발급 완료되었으므로)
 echo -e "${YELLOW}5. HTTPS 설정으로 변경...${NC}"
 mv docker-compose.prod.yml.backup docker-compose.prod.yml  # 백업에서 원본 복원
+
+# 임시 nginx 설정 파일 삭제
+rm -f nginx/conf.d/certbot-temp.conf
 
 # 전체 서비스 재시작 (이제 HTTPS로 동작)
 echo -e "${YELLOW}6. 전체 서비스 재시작...${NC}"
