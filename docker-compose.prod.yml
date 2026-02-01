@@ -27,7 +27,7 @@ services:
       dockerfile: Dockerfile.prod  # 프로덕션 Dockerfile 사용
       args:
         # 빌드 시점에 환경변수 전달 (Next.js는 빌드 타임에 NEXT_PUBLIC_* 변수를 번들링)
-        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://api.my-pitch.work}
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-https://api.my-pitch.work}
         NEXT_PUBLIC_MAX_FILE_SIZE_MB: ${MAX_FILE_SIZE_MB:-7}
     container_name: my-pitch-client
     environment:
@@ -45,7 +45,7 @@ services:
     environment:
       # MinIO 설정
       - MINIO_ENDPOINT=${MINIO_ENDPOINT:-fileserver:9000}
-      - MINIO_PUBLIC_ENDPOINT=${MINIO_PUBLIC_ENDPOINT:-http://files.my-pitch.work}
+      - MINIO_PUBLIC_ENDPOINT=${MINIO_PUBLIC_ENDPOINT:-https://files.my-pitch.work}
       - MINIO_ROOT_USER=${MINIO_ROOT_USER:-minioadmin}
       - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD:-minioadmin}
       # 버킷 설정
