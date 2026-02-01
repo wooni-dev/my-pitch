@@ -119,6 +119,7 @@ for domain in "${domains[@]}"; do
     
     # webroot 방식: nginx가 제공하는 폴더에 챌린지 파일 생성 → Let's Encrypt가 검증
     # --entrypoint certbot으로 기본 entrypoint 오버라이드
+    # --force-renewal: 기존 인증서가 있어도 강제로 갱신
     docker compose -f docker-compose.prod.yml run --rm --entrypoint certbot certbot certonly \
         --webroot \
         --webroot-path=/var/www/certbot \
@@ -126,6 +127,7 @@ for domain in "${domains[@]}"; do
         --email $email \
         --agree-tos \
         --no-eff-email \
+        --force-renewal \
         -d $domain
     
     # 발급 실패 시 원복 및 중단
