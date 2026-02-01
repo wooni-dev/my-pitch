@@ -118,7 +118,8 @@ for domain in "${domains[@]}"; do
     echo -e "${GREEN}도메인 처리 중: $domain${NC}"
     
     # webroot 방식: nginx가 제공하는 폴더에 챌린지 파일 생성 → Let's Encrypt가 검증
-    docker compose -f docker-compose.prod.yml run --rm certbot certonly \
+    # --entrypoint certbot으로 기본 entrypoint 오버라이드
+    docker compose -f docker-compose.prod.yml run --rm --entrypoint certbot certbot certonly \
         --webroot \
         --webroot-path=/var/www/certbot \
         $staging_arg \
@@ -132,6 +133,7 @@ for domain in "${domains[@]}"; do
         echo -e "${RED}오류: $domain 인증서 발급 실패${NC}"
         echo -e "${YELLOW}원래 설정으로 복원 중...${NC}"
         mv docker-compose.prod.yml.backup docker-compose.prod.yml
+        rm -f nginx/conf.d/certbot-temp.conf
         docker compose -f docker-compose.prod.yml down
         exit 1
     fi
