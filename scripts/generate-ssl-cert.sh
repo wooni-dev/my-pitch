@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Let's Encrypt SSL 인증서 초기 발급 스크립트
-# 사용법: ./init-letsencrypt.sh
+# 사용법: ./scripts/generate-ssl-cert.sh
 
 # 에러 발생 시 스크립트 즉시 중단 (안전장치)
 set -e
@@ -54,49 +54,26 @@ fi
 # ========================================
 # Let's Encrypt 전용 임시 Nginx 설정 생성
 # ========================================
-echo -e "${YELLOW}2. Let's Encrypt 전용 임시 Nginx 설정 생성...${NC}"
-if [ ! -f "docker-compose.prod.yml" ]; then
-    echo -e "${RED}오류: docker-compose.prod.yml 파일을 찾을 수 없습니다.${NC}"
+echo -e "${YELLOW}2. Docker Compose 파일 확인...${NC}"
+if [ ! -f "docker-compose.yml" ]; then
+    echo -e "${RED}오류: docker-compose.yml 파일을 찾을 수 없습니다.${NC}"
     exit 1
 fi
 
-# 컨테이너가 실행 중이면 중지
-if [ "$(docker ps -q -f name=my-pitch-nginx)" ]; then
-    echo -e "${YELLOW}기존 컨테이너 중지...${NC}"
-    docker compose -f docker-compose.prod.yml down
+if [ ! -f "docker-compose.cert-generation.yml" ]; then
+    echo -e "${RED}오류: docker-compose.cert-generation.yml 파일을 찾을 수 없습니다.${NC}"
+    exit 1
 fi
 
-# Let's Encrypt 인증서 발급 전용 임시 nginx 설정 파일 생성
-cat > nginx/conf.d/certbot-temp.conf << 'EOF'
-# Let's Encrypt 인증서 발급 전용 임시 설정
-# upstream 없이 certbot의 acme-challenge만 처리
+# 기존 운영 컨테이너가 실행 중이면 중지
+if [ "$(docker ps -q -f name=my-pitch-nginx)" ]; then
+    echo -e "${YELLOW}기존 컨테이너 중지...${NC}"
+    docker compose down
+fi
 
-server {
-    listen 80 default_server;
-    listen [::]:80 default_server;
-    server_name _;
-
-    # Let's Encrypt 챌린지 경로
-    location /.well-known/acme-challenge/ {
-        root /var/www/certbot;
-    }
-
-    # 나머지 요청은 200 응답
-    location / {
-        return 200 "Let's Encrypt certification in progress...\n";
-        add_header Content-Type text/plain;
-    }
-}
-EOF
-
-# HTTP 설정으로 임시 변경
-echo -e "${YELLOW}3. HTTP 모드로 Nginx 시작...${NC}"
-cp docker-compose.prod.yml docker-compose.prod.yml.backup  # 백업 생성
-sed -i 's/production-https.conf/certbot-temp.conf/g' docker-compose.prod.yml  # 임시 설정으로 변경
-sed -i 's/production-http.conf/certbot-temp.conf/g' docker-compose.prod.yml  # 임시 설정으로 변경
-
-# nginx만 시작 (의존성 무시 - API/Client 없이 nginx만 실행)
-docker compose -f docker-compose.prod.yml up -d --no-deps nginx
+# 챌린지용 nginx 시작
+echo -e "${YELLOW}3. 챌린지용 Nginx 시작 (docker-compose.cert-generation.yml)...${NC}"
+docker compose -f docker-compose.cert-generation.yml up -d nginx-challenge
 
 echo -e "${YELLOW}Nginx 시작 대기 중 (5초)...${NC}"
 sleep 5
@@ -117,10 +94,10 @@ fi
 for domain in "${domains[@]}"; do
     echo -e "${GREEN}도메인 처리 중: $domain${NC}"
     
-    # webroot 방식: nginx가 제공하는 폴더에 챌린지 파일 생성 → Let's Encrypt가 검증
+    # webroot 방식: nginx-challenge가 제공하는 폴더에 챌린지 파일 생성 → Let's Encrypt가 검증
     # --entrypoint certbot으로 기본 entrypoint 오버라이드
     # --force-renewal: 기존 인증서가 있어도 강제로 갱신
-    docker compose -f docker-compose.prod.yml run --rm --entrypoint certbot certbot certonly \
+    docker compose -f docker-compose.cert-generation.yml run --rm --entrypoint certbot certbot-init certonly \
         --webroot \
         --webroot-path=/var/www/certbot \
         $staging_arg \
@@ -130,34 +107,29 @@ for domain in "${domains[@]}"; do
         --force-renewal \
         -d $domain
     
-    # 발급 실패 시 원복 및 중단
+    # 발급 실패 시 정리 및 중단
     if [ $? -ne 0 ]; then
         echo -e "${RED}오류: $domain 인증서 발급 실패${NC}"
-        echo -e "${YELLOW}원래 설정으로 복원 중...${NC}"
-        mv docker-compose.prod.yml.backup docker-compose.prod.yml
-        rm -f nginx/conf.d/certbot-temp.conf
-        docker compose -f docker-compose.prod.yml down
+        echo -e "${YELLOW}챌린지 컨테이너 정리 중...${NC}"
+        docker compose -f docker-compose.cert-generation.yml down
         exit 1
     fi
 done
 
 # ========================================
-# HTTPS 설정으로 전환 및 전체 서비스 시작
+# 챌린지 컨테이너 정리
 # ========================================
-# HTTPS 설정으로 변경 (인증서 발급 완료되었으므로)
-echo -e "${YELLOW}5. HTTPS 설정으로 변경...${NC}"
-mv docker-compose.prod.yml.backup docker-compose.prod.yml  # 백업에서 원본 복원
-
-# 임시 nginx 설정 파일 삭제
-rm -f nginx/conf.d/certbot-temp.conf
-
-# 전체 서비스 재시작 (이제 HTTPS로 동작)
-echo -e "${YELLOW}6. 전체 서비스 재시작...${NC}"
-docker compose -f docker-compose.prod.yml down
-docker compose -f docker-compose.prod.yml up -d
+echo -e "${YELLOW}5. 챌린지 컨테이너 중지...${NC}"
+docker compose -f docker-compose.cert-generation.yml down
 
 echo -e "${GREEN}=== SSL 인증서 발급 완료! ===${NC}"
-echo -e "${GREEN}모든 도메인이 HTTPS로 서비스됩니다.${NC}"
-echo -e "${YELLOW}인증서는 자동으로 갱신됩니다. (certbot 컨테이너가 90일마다 자동 처리)${NC}"
-
+echo -e "${GREEN}인증서 위치: ./certbot/conf/live/도메인명/${NC}"
+echo -e ""
+echo -e "${YELLOW}다음 단계:${NC}"
+echo -e "  개발 환경: ${GREEN}docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d${NC}"
+echo -e "  운영 환경: ${GREEN}docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d${NC}"
+echo -e ""
+echo -e "${YELLOW}참고:${NC}"
+echo -e "  - 인증서는 certbot 컨테이너가 자동으로 갱신합니다 (12시간마다 체크)"
+echo -e "  - 모든 도메인이 HTTPS로 서비스됩니다"
 

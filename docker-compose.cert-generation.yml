@@ -1,0 +1,23 @@
+# Let's Encrypt 인증서 초기 발급 전용 Docker Compose 설정
+# scripts/generate-ssl-cert.sh 스크립트에서 사용됨
+
+services:
+  nginx-challenge:
+    image: nginx:latest
+    container_name: my-pitch-nginx-challenge
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/conf.d/nginx.cert-challenge.conf:/etc/nginx/conf.d/default.conf
+      - ./certbot/www:/var/www/certbot
+    restart: "no"  # 일회성 실행
+
+  certbot-init:
+    image: certbot/certbot
+    container_name: my-pitch-certbot-init
+    volumes:
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+    # entrypoint는 scripts/generate-ssl-cert.sh에서 --entrypoint로 덮어씀
+    entrypoint: "certbot"
+

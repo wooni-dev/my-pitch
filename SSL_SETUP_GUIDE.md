@@ -17,34 +17,26 @@
 
 ```bash
 # 1. 스크립트에 실행 권한 부여
-chmod +x init-letsencrypt.sh
+chmod +x scripts/generate-ssl-cert.sh
 
 # 2. 스크립트 편집 - 이메일 주소 수정
-# init-letsencrypt.sh 파일을 열어서 다음 라인 수정:
+# scripts/generate-ssl-cert.sh 파일을 열어서 다음 라인 수정:
 # email="your-email@example.com"  → 실제 이메일 주소로 변경
 
 # 3. 스크립트 실행
-./init-letsencrypt.sh
+./scripts/generate-ssl-cert.sh
 ```
 
-### 수동 설치
+### 수동 설치 (고급)
 
-#### 1단계: 디렉토리 생성
-```bash
-mkdir -p certbot/conf
-mkdir -p certbot/www
-```
+자동 스크립트를 사용하지 않고 직접 제어하려면:
 
-#### 2단계: HTTP 모드로 먼저 시작
 ```bash
-# docker-compose.prod.yml에서 임시로 production-http.conf 사용
-docker-compose -f docker-compose.prod.yml up -d nginx
-```
+# 1. 챌린지 컨테이너 시작
+docker compose -f docker-compose.cert-generation.yml up -d nginx-challenge
 
-#### 3단계: 각 도메인별로 인증서 발급
-```bash
-# my-pitch.work
-docker-compose -f docker-compose.prod.yml run --rm certbot certonly \
+# 2. 인증서 발급
+docker compose -f docker-compose.cert-generation.yml run --rm --entrypoint certbot certbot-init certonly \
   --webroot \
   --webroot-path=/var/www/certbot \
   --email your-email@example.com \
@@ -52,30 +44,11 @@ docker-compose -f docker-compose.prod.yml run --rm certbot certonly \
   --no-eff-email \
   -d my-pitch.work
 
-# api.my-pitch.work
-docker-compose -f docker-compose.prod.yml run --rm certbot certonly \
-  --webroot \
-  --webroot-path=/var/www/certbot \
-  --email your-email@example.com \
-  --agree-tos \
-  --no-eff-email \
-  -d api.my-pitch.work
+# 3. 챌린지 컨테이너 정리
+docker compose -f docker-compose.cert-generation.yml down
 
-# files.my-pitch.work
-docker-compose -f docker-compose.prod.yml run --rm certbot certonly \
-  --webroot \
-  --webroot-path=/var/www/certbot \
-  --email your-email@example.com \
-  --agree-tos \
-  --no-eff-email \
-  -d files.my-pitch.work
-```
-
-#### 4단계: HTTPS 설정으로 변경
-```bash
-# docker-compose.prod.yml에서 production-https.conf 사용하도록 수정 후
-docker-compose -f docker-compose.prod.yml down
-docker-compose -f docker-compose.prod.yml up -d
+# 4. 운영 서비스 시작
+docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
 ```
 
 ## 인증서 갱신
@@ -84,13 +57,13 @@ docker-compose -f docker-compose.prod.yml up -d
 
 수동으로 갱신하려면:
 ```bash
-docker-compose -f docker-compose.prod.yml run --rm certbot renew
-docker-compose -f docker-compose.prod.yml exec nginx nginx -s reload
+docker compose -f docker-compose.yml -f docker-compose.prod.yml run --rm certbot renew
+docker compose -f docker-compose.yml -f docker-compose.prod.yml exec nginx nginx -s reload
 ```
 
 ## 테스트 모드
 
-실제 발급 전에 테스트하려면 `init-letsencrypt.sh`에서:
+실제 발급 전에 테스트하려면 `scripts/generate-ssl-cert.sh`에서:
 ```bash
 staging=1  # 테스트 모드
 ```
@@ -107,7 +80,7 @@ staging=1  # 테스트 모드
 rm -rf certbot/conf/live
 rm -rf certbot/conf/archive
 rm -rf certbot/conf/renewal
-./init-letsencrypt.sh
+./scripts/generate-ssl-cert.sh
 ```
 
 ### HTTPS 접속 안됨
@@ -133,10 +106,18 @@ my-pitch/
 │   └── www/               # Let's Encrypt 챌린지용
 ├── nginx/
 │   └── conf.d/
-│       ├── production-http.conf   # HTTP 전용 (초기 발급용)
-│       └── production-https.conf  # HTTPS 설정 (최종)
-├── docker-compose.prod.yml
-└── init-letsencrypt.sh
+│       ├── nginx.cert-challenge.conf  # 인증서 챌린지
+│       ├── nginx.dev.conf         # 개발 환경 설정
+│       └── nginx.prod.conf        # 운영 환경 설정 (HTTPS)
+├── docker-compose.yml             # 공통 베이스 설정
+├── docker-compose.dev.yml         # 개발 환경
+├── docker-compose.prod.yml        # 프로덕션 환경
+├── docker-compose.cert-generation.yml  # 인증서 생성
+├── nginx/
+│   └── scripts/
+│       └── entrypoint.sh          # Nginx SSL 자동 갱신 스크립트
+└── scripts/
+    └── generate-ssl-cert.sh       # SSL 인증서 초기 발급 스크립트
 ```
 
 ## 변경된 환경변수
@@ -151,7 +132,7 @@ MINIO_PUBLIC_ENDPOINT=https://files.my-pitch.work
 
 클라이언트를 다시 빌드해야 합니다:
 ```bash
-docker-compose -f docker-compose.prod.yml build client
-docker-compose -f docker-compose.prod.yml up -d client
+docker compose -f docker-compose.yml -f docker-compose.prod.yml build client
+docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d client
 ```
 

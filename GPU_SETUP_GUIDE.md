@@ -87,7 +87,7 @@ sudo systemctl restart docker
 
 ### GPU 설정 추가
 
-`docker-compose.prod.yml` (또는 `docker-compose.yml`)에서 GPU를 사용할 서비스에 다음 설정을 추가합니다:
+`docker-compose.prod.yml` (또는 개발 환경에서는 `docker-compose.dev.yml`)에서 GPU를 사용할 서비스에 다음 설정을 추가합니다:
 
 ```yaml
 services:
@@ -160,7 +160,7 @@ docker run --rm --gpus all nvidia/cuda:11.8.0-base-ubuntu22.04 nvidia-smi
 ### 2. 프로덕션 환경 실행
 
 ```bash
-docker compose -f docker-compose.prod.yml up -d --build
+docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
 ```
 
 ### 3. API 컨테이너에서 GPU 확인
@@ -323,7 +323,7 @@ environment:
 - [ ] Docker GPU 런타임 설정 완료
 - [ ] Docker 재시작 완료
 - [ ] `docker run --rm --gpus all nvidia/cuda:12.2.0-base-ubuntu22.04 nvidia-smi` 테스트 성공
-- [ ] `docker-compose.prod.yml`에 GPU 설정 추가
+- [ ] `docker-compose.prod.yml` (또는 `docker-compose.dev.yml`)에 GPU 설정 추가
 - [ ] 프로덕션 환경에서 컨테이너 내부 GPU 인식 확인
 
 모든 항목이 체크되면 GPU 설정이 완료된 것입니다! 🎉

@@ -1,60 +1,29 @@
 services:
   nginx:
-    image: nginx:latest
-    container_name: my-pitch-nginx
     ports:
-      - "80:80"
       - "443:443"
     volumes:
-      - ./nginx/html:/usr/share/nginx/html
-      - ./nginx/conf.d/production-https.conf:/etc/nginx/conf.d/default.conf  # HTTPS 설정 파일
-      - ./certbot/conf:/etc/letsencrypt  # SSL 인증서
-      - ./certbot/www:/var/www/certbot  # Certbot 챌린지용
-    environment:
-      - TZ=Asia/Seoul
-    restart: unless-stopped
-    depends_on:
-      - client
-      - api
-      - fileserver
-    networks:
-      - my-pitch-network
-    command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"  # 6시간마다 nginx 리로드
+      - ./nginx/conf.d/nginx.prod.conf:/etc/nginx/conf.d/default.conf
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
 
   client:
     build:
-      context: ./client
-      dockerfile: Dockerfile.prod  # 프로덕션 Dockerfile 사용
+      dockerfile: Dockerfile.prod
       args:
         # 빌드 시점에 환경변수 전달 (Next.js는 빌드 타임에 NEXT_PUBLIC_* 변수를 번들링)
         NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-https://api.my-pitch.work}
         NEXT_PUBLIC_MAX_FILE_SIZE_MB: ${MAX_FILE_SIZE_MB:-7}
-    container_name: my-pitch-client
     environment:
       - NODE_ENV=production
-      - TZ=Asia/Seoul
-    restart: unless-stopped
-    networks:
-      - my-pitch-network
 
   api:
     build:
-      context: ./api
-      dockerfile: Dockerfile.prod  # 프로덕션 Dockerfile 사용
-    container_name: my-pitch-api
+      dockerfile: Dockerfile.prod
     environment:
-      # MinIO 설정
-      - MINIO_ENDPOINT=${MINIO_ENDPOINT:-fileserver:9000}
+      # 프로덕션: HTTPS 엔드포인트
       - MINIO_PUBLIC_ENDPOINT=${MINIO_PUBLIC_ENDPOINT:-https://files.my-pitch.work}
-      - MINIO_ROOT_USER=${MINIO_ROOT_USER:-minioadmin}
-      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD:-minioadmin}
-      # 버킷 설정
-      - ORIGINAL_BUCKET=${ORIGINAL_BUCKET:-original-tracks}
-      - SEPARATED_BUCKET=${SEPARATED_BUCKET:-separated-tracks}
-      # 파일 업로드 설정
-      - MAX_FILE_SIZE_MB=${MAX_FILE_SIZE_MB:-7}
       - FLASK_ENV=production
-      - TZ=Asia/Seoul
     # GPU 설정 (VM에 GPU가 있는 경우에만 주석 해제)
     deploy:
       resources:
@@ -63,25 +32,6 @@ services:
             - driver: nvidia
               count: all  # 모든 GPU 사용 (특정 개수 지정하려면 숫자로 변경, 예: 1)
               capabilities: [gpu]
-    restart: unless-stopped
-    networks:
-      - my-pitch-network
-    depends_on:
-      - fileserver
-
-  fileserver:
-    image: minio/minio:latest
-    container_name: my-pitch-fileserver
-    environment:
-      - MINIO_ROOT_USER=${MINIO_ROOT_USER:-minioadmin}
-      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD:-minioadmin}
-      - TZ=Asia/Seoul
-    volumes:
-      - ./fileserver/data:/data
-    command: server /data --console-address ":9001"
-    restart: unless-stopped
-    networks:
-      - my-pitch-network
 
   certbot:
     image: certbot/certbot
@@ -89,8 +39,5 @@ services:
     volumes:
       - ./certbot/conf:/etc/letsencrypt
       - ./certbot/www:/var/www/certbot
-    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
-
-networks:
-  my-pitch-network:
-    driver: bridge
+      - ./certbot/scripts/entrypoint.sh:/entrypoint.sh:ro
+    entrypoint: ["/entrypoint.sh"]

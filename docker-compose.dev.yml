@@ -1,0 +1,35 @@
+services:
+  nginx:
+    volumes:
+      - ./nginx/conf.d/nginx.dev.conf:/etc/nginx/conf.d/default.conf
+
+  client:
+    build:
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3000:3000"
+    volumes:
+      # 개발: 코드 핫 리로드
+      - ./client:/app
+      - /app/node_modules
+      - /app/.next
+    environment:
+      # API URL (Docker 네트워크 내부 주소)
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://my-pitch-api:5000}
+      - NEXT_PUBLIC_MAX_FILE_SIZE_MB=${MAX_FILE_SIZE_MB:-7}
+
+  api:
+    build:
+      dockerfile: Dockerfile.dev
+    ports:
+      - "5000:5000"
+    volumes:
+      # 개발: 코드 핫 리로드
+      - ./api:/app
+    environment:
+      # 개발: HTTP 엔드포인트
+      - MINIO_PUBLIC_ENDPOINT=${MINIO_PUBLIC_ENDPOINT:-http://files.my-pitch}
+      # 개발: 외부 분석 서버 사용
+      - USE_EXTERNAL_SEPARATOR=${USE_EXTERNAL_SEPARATOR:-True}
+      - ANALYSIS_SERVER_URL=${ANALYSIS_SERVER_URL:-https://melinda-subtemperate-grace.ngrok-free.dev}
+
