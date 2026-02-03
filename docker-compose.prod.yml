@@ -21,9 +21,9 @@ services:
     build:
       dockerfile: Dockerfile.prod
     environment:
-      # 프로덕션: HTTPS 엔드포인트
-      - MINIO_PUBLIC_ENDPOINT=${MINIO_PUBLIC_ENDPOINT:-https://files.my-pitch.work}
       - FLASK_ENV=production
+      - TEMP_UPLOAD_FOLDER=${TEMP_UPLOAD_FOLDER:-/tmp/uploads}
+      - TEMP_OUTPUT_FOLDER=${TEMP_OUTPUT_FOLDER:-/tmp/outputs}
     # GPU 설정 (VM에 GPU가 있는 경우에만 주석 해제)
     deploy:
       resources:
@@ -36,6 +36,8 @@ services:
   certbot:
     image: certbot/certbot
     container_name: my-pitch-certbot
+    environment:
+      - TZ=${TZ:-Asia/Seoul}
     volumes:
       - ./certbot/conf:/etc/letsencrypt
       - ./certbot/www:/var/www/certbot

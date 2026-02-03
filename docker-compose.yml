@@ -7,7 +7,7 @@ services:
     volumes:
       - ./nginx/html:/usr/share/nginx/html
     environment:
-      - TZ=Asia/Seoul
+      - TZ=${TZ:-Asia/Seoul}
     restart: unless-stopped
     networks:
       - my-pitch-network
@@ -21,7 +21,7 @@ services:
       context: ./client
     container_name: my-pitch-client
     environment:
-      - TZ=Asia/Seoul
+      - TZ=${TZ:-Asia/Seoul}
     restart: unless-stopped
     networks:
       - my-pitch-network
@@ -35,6 +35,7 @@ services:
     environment:
       # MinIO 설정 (.env 파일에서 값 로드, 없으면 기본값 사용)
       - MINIO_ENDPOINT=${MINIO_ENDPOINT:-fileserver:9000}
+      - MINIO_PUBLIC_ENDPOINT=${MINIO_PUBLIC_ENDPOINT:-http://files.my-pitch}
       - MINIO_ROOT_USER=${MINIO_ROOT_USER:-minioadmin}
       - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD:-minioadmin}
       # 버킷 설정
@@ -42,7 +43,9 @@ services:
       - SEPARATED_BUCKET=${SEPARATED_BUCKET:-separated-tracks}
       # 파일 업로드 설정
       - MAX_FILE_SIZE_MB=${MAX_FILE_SIZE_MB:-7}
-      - TZ=Asia/Seoul
+      # 음원 분리 방식 (분기 로직용, dev/prod 환경 파일에서 override)
+      - USE_EXTERNAL_SEPARATOR=${USE_EXTERNAL_SEPARATOR:-False}
+      - TZ=${TZ:-Asia/Seoul}
     restart: unless-stopped
     networks:
       - my-pitch-network
@@ -56,7 +59,7 @@ services:
       # MinIO 관리자 계정 (.env에서 변경 가능, 기본값: minioadmin)
       - MINIO_ROOT_USER=${MINIO_ROOT_USER:-minioadmin}
       - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD:-minioadmin}
-      - TZ=Asia/Seoul
+      - TZ=${TZ:-Asia/Seoul}
     volumes:
       - ./fileserver/data:/data
     command: server /data --console-address ":9001"
