@@ -12,6 +12,7 @@ export default function Home() {
   const [isUploading, setIsUploading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [vocalType, setVocalType] = useState<"female" | "male" | null>(null);
+  const [isGuideOpen, setIsGuideOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   const isAudioFile = (file: File): boolean => {
@@ -161,11 +162,32 @@ export default function Home() {
             </p>
           </div>
 
-          {/* 사용 안내 */}
-          <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900 rounded-xl p-6">
-            <div className="flex items-start gap-3 mb-4">
+          {/* 사용 안내 - Accordion */}
+          <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900 rounded-xl overflow-hidden">
+            <button
+              onClick={() => setIsGuideOpen(!isGuideOpen)}
+              className="w-full p-4 flex items-center justify-between hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors cursor-pointer"
+            >
+              <div className="flex items-center gap-3">
+                <svg 
+                  className="w-6 h-6 text-blue-600 dark:text-blue-400 flex-shrink-0" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24"
+                >
+                  <path 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round" 
+                    strokeWidth={2} 
+                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" 
+                  />
+                </svg>
+                <h2 className="text-lg font-semibold text-blue-900 dark:text-blue-300">
+                  사용 안내
+                </h2>
+              </div>
               <svg 
-                className="w-6 h-6 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" 
+                className={`w-5 h-5 text-blue-600 dark:text-blue-400 transition-transform ${isGuideOpen ? 'rotate-180' : ''}`}
                 fill="none" 
                 stroke="currentColor" 
                 viewBox="0 0 24 24"
@@ -174,35 +196,35 @@ export default function Home() {
                   strokeLinecap="round" 
                   strokeLinejoin="round" 
                   strokeWidth={2} 
-                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" 
+                  d="M19 9l-7 7-7-7" 
                 />
               </svg>
-              <div>
-                <h2 className="text-lg font-semibold text-blue-900 dark:text-blue-300 mb-2">
-                  사용 안내
-                </h2>
-                <p className="text-sm text-blue-800 dark:text-blue-300 mb-3">
+            </button>
+            
+            <div className={`transition-all duration-300 ease-in-out ${isGuideOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'} overflow-hidden`}>
+              <div className="px-4 pb-4 pt-2 space-y-4">
+                <p className="text-sm text-blue-800 dark:text-blue-300">
                   노래방에서 녹음한 음성으로 음높이를 확인하기 위한 서비스입니다
                 </p>
-              </div>
-            </div>
-            
-            <div className="space-y-2 text-sm text-blue-800 dark:text-blue-300">
-              <div className="flex items-start gap-2">
-                <span className="text-blue-600 dark:text-blue-400 font-bold">•</span>
-                <span>악보는 <strong>노래방 악보처럼 간소화</strong>되어 표시됩니다</span>
-              </div>
-              <div className="flex items-start gap-2">
-                <span className="text-blue-600 dark:text-blue-400 font-bold">•</span>
-                <span>박자는 <strong>4/4박자로 고정</strong>되어 있습니다</span>
-              </div>
-              <div className="flex items-start gap-2">
-                <span className="text-blue-600 dark:text-blue-400 font-bold">•</span>
-                <span>모든 음표는 <strong>높은음자리표(G clef)로 통일</strong>되어 표시됩니다</span>
-              </div>
-              <div className="flex items-start gap-2">
-                <span className="text-blue-600 dark:text-blue-400 font-bold">•</span>
-                <span>복잡한 악보 규칙은 생략되어 <strong>음높이 확인에만 집중</strong>할 수 있습니다</span>
+                
+                <div className="space-y-2 text-sm text-blue-800 dark:text-blue-300">
+                  <div className="flex items-start gap-2">
+                    <span className="text-blue-600 dark:text-blue-400 font-bold">•</span>
+                    <span>악보는 <strong>노래방 악보처럼 간소화</strong>되어 표시됩니다</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <span className="text-blue-600 dark:text-blue-400 font-bold">•</span>
+                    <span>박자는 <strong>4/4박자로 고정</strong>되어 있습니다</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <span className="text-blue-600 dark:text-blue-400 font-bold">•</span>
+                    <span>모든 음표는 <strong>높은음자리표(G clef)로 통일</strong>되어 표시됩니다</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <span className="text-blue-600 dark:text-blue-400 font-bold">•</span>
+                    <span>복잡한 악보 규칙은 생략되어 <strong>음높이 확인에만 집중</strong>할 수 있습니다</span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
