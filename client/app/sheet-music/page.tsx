@@ -123,16 +123,12 @@ export default function SheetMusicPage() {
     if (!audio) return;
 
     const handleEnded = () => {
-      setIsPlaying(false);
-      setCurrentTime(0);
+      // ref 값을 먼저 초기화 (state 업데이트 전)
       lastActiveNoteIndexRef.current = -1;
       
-      // 모든 하이라이트 제거
-      const svgElement = containerRef.current?.querySelector('svg');
-      if (svgElement) {
-        const highlights = svgElement.querySelectorAll('.note-highlight');
-        highlights.forEach(highlight => highlight.remove());
-      }
+      // state 업데이트 (useEffect 트리거)
+      setIsPlaying(false);
+      setCurrentTime(0);
       
       // 맨 위로 스크롤
       window.scrollTo({
@@ -146,7 +142,7 @@ export default function SheetMusicPage() {
     return () => {
       audio.removeEventListener('ended', handleEnded);
     };
-  }, []);
+  }, [audioUrl]); // audioUrl 의존성 추가로 오디오 변경 시 이벤트 재등록
 
   // 음표 하이라이트 업데이트
   useEffect(() => {
@@ -156,6 +152,18 @@ export default function SheetMusicPage() {
     if (!svgElement) return;
 
     const noteElements = svgElement.querySelectorAll('.vf-stavenote[data-start-time]');
+    
+    // 재생이 끝났거나 정지 상태에서 currentTime이 0이면 모든 하이라이트 제거
+    if (!isPlaying && currentTime === 0) {
+      noteElements.forEach((element) => {
+        const existingHighlight = element.querySelector('.note-highlight');
+        if (existingHighlight) {
+          existingHighlight.remove();
+        }
+      });
+      return; // 더 이상 진행하지 않음
+    }
+    
     let activeNoteElement: Element | null = null;
     let currentActiveIndex = -1;
     
@@ -262,18 +270,16 @@ export default function SheetMusicPage() {
   
   const handleReset = () => {
     if (audioRef.current) {
-      audioRef.current.currentTime = 0;
-      audioRef.current.pause();
-      setIsPlaying(false);
-      setCurrentTime(0);
+      // ref 값을 먼저 초기화
       lastActiveNoteIndexRef.current = -1;
       
-      // 모든 하이라이트 제거
-      const svgElement = containerRef.current?.querySelector('svg');
-      if (svgElement) {
-        const highlights = svgElement.querySelectorAll('.note-highlight');
-        highlights.forEach(highlight => highlight.remove());
-      }
+      // 오디오 초기화
+      audioRef.current.currentTime = 0;
+      audioRef.current.pause();
+      
+      // state 업데이트 (useEffect 트리거)
+      setIsPlaying(false);
+      setCurrentTime(0);
       
       // 맨 위로 스크롤
       window.scrollTo({
