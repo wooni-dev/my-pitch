@@ -14,12 +14,17 @@ export default function SheetMusicPage() {
   const router = useRouter();
   const containerRef = useRef<HTMLDivElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
+  const titleRef = useRef<HTMLHeadingElement>(null);
   
   // 오디오 재생 상태
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
   const animationFrameRef = useRef<number | undefined>(undefined);
   const lastActiveNoteIndexRef = useRef<number>(-1);
+  
+  // 상단바 제목 상태
+  const [showTitleInHeader, setShowTitleInHeader] = useState(false);
   
   // 컨테이너 크기 변화 감지
   const resizeTrigger = useResizeObserver(containerRef);
@@ -35,6 +40,14 @@ export default function SheetMusicPage() {
   
   // 오디오 URL 추출
   const audioUrl = apiData?.file_url || '';
+  
+  // 시간을 MM:SS 형식으로 변환
+  const formatTime = (time: number) => {
+    if (isNaN(time)) return '00:00';
+    const minutes = Math.floor(time / 60);
+    const seconds = Math.floor(time % 60);
+    return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  };
   
   // clef에 따른 하이라이트 색상 설정
   const highlightColors = apiData?.clef === 'bass' 
@@ -65,6 +78,44 @@ export default function SheetMusicPage() {
       }
     };
   }, [isPlaying]);
+
+  // 오디오 duration 로드
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    const handleLoadedMetadata = () => {
+      setDuration(audio.duration);
+    };
+
+    audio.addEventListener('loadedmetadata', handleLoadedMetadata);
+    
+    // 이미 로드되었을 경우
+    if (audio.duration) {
+      setDuration(audio.duration);
+    }
+    
+    return () => {
+      audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
+    };
+  }, [audioUrl]);
+
+  // 스크롤 이벤트로 상단바 제목 전환
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!titleRef.current) return;
+      
+      const titleRect = titleRef.current.getBoundingClientRect();
+      // 제목이 화면 위로 벗어나면 상단바에 표시
+      setShowTitleInHeader(titleRect.bottom < 64); // 64px는 상단바 높이
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
 
   // 오디오 종료 이벤트 처리
   useEffect(() => {
@@ -231,6 +282,23 @@ export default function SheetMusicPage() {
       });
     }
   };
+  
+  const handleSkipBackward = () => {
+    if (audioRef.current) {
+      audioRef.current.currentTime = Math.max(0, audioRef.current.currentTime - 10);
+      setCurrentTime(audioRef.current.currentTime);
+    }
+  };
+  
+  const handleSkipForward = () => {
+    if (audioRef.current) {
+      audioRef.current.currentTime = Math.min(
+        audioRef.current.duration || 0,
+        audioRef.current.currentTime + 10
+      );
+      setCurrentTime(audioRef.current.currentTime);
+    }
+  };
 
   // VexFlow로 악보 그리기
   useEffect(() => {
@@ -389,31 +457,97 @@ export default function SheetMusicPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-black font-sans">
-      <main className="flex min-h-screen w-full max-w-7xl flex-col items-center justify-center py-4 px-4">
-        <div className="w-full bg-white rounded-lg shadow-xl p-8">
-          <div className="text-center mb-6">
-            <h1 className="text-3xl font-bold text-gray-800">{title}</h1>
+      {/* 상단 메뉴바 - 네비게이션 */}
+      <div className={`fixed top-0 left-0 right-0 z-50 bg-gray-900/95 backdrop-blur-md border-b border-white/10 transition-all duration-300
+                      ${isPlaying ? 'opacity-30 hover:opacity-100' : 'opacity-100'}`}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            {/* 왼쪽: 홈 버튼 */}
+            <button
+              onClick={() => router.push('/')}
+              className="group flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/10 transition-all active:scale-95 cursor-pointer"
+              aria-label="홈으로 돌아가기"
+            >
+              <svg
+                className="w-5 h-5 text-white/90 transition-transform group-hover:scale-110"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
+                />
+              </svg>
+              <span className="text-sm font-medium text-white/90 hidden sm:inline">홈으로</span>
+            </button>
+
+            {/* 중앙: 곡 제목 (스크롤 시 동적 변경) */}
+            <div className="flex-1 text-center px-4">
+              <h1 className="text-lg sm:text-xl font-bold text-white/90 truncate transition-opacity duration-300">
+                {showTitleInHeader ? title : 'My Pitch'}
+              </h1>
+            </div>
+
+            {/* 오른쪽: 빈 공간 (대칭을 위해) */}
+            <div className="w-[43px]"></div>
+          </div>
+        </div>
+      </div>
+
+      <main className="flex min-h-screen w-full max-w-7xl flex-col items-center justify-center py-4 px-4 pt-20 pb-28">
+        <div className="w-full bg-white rounded-lg shadow-xl p-8 mb-8">
+          {/* 악보 제목 */}
+          <div className="text-center mb-8">
+            <h1 ref={titleRef} className="text-3xl font-bold text-gray-800">
+              {title}
+            </h1>
           </div>
           
           <div 
             ref={containerRef} 
             className="w-full bg-white"
           />
-          
-          {/* 플로팅 오디오 컨트롤 버튼 - 오른쪽 하단 고정 */}
-          <div className="fixed bottom-8 right-8 z-50">
-            <audio ref={audioRef} src={audioUrl} />
-            
-            <div className={`group flex items-center gap-3 bg-gray-900/80 backdrop-blur-md px-4 py-3 rounded-2xl border border-white/10 shadow-xl transition-all duration-300
-                            ${isPlaying ? 'opacity-20 scale-90 hover:opacity-100 hover:scale-100' : 'opacity-100 scale-100'}`}>
-              {/* 처음으로 버튼 */}
+        </div>
+      </main>
+
+      {/* 하단 미디어 컨트롤 바 */}
+      <div className={`fixed bottom-0 left-0 right-0 z-50 bg-gray-900/95 backdrop-blur-md border-t border-white/10 transition-all duration-300
+                      ${isPlaying ? 'opacity-30 hover:opacity-100' : 'opacity-100'}`}>
+        <audio ref={audioRef} src={audioUrl} />
+        
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-20">
+            {/* 왼쪽: 현재 시간 */}
+            <div className="w-16 text-center">
+              <span className="text-sm font-medium text-white/90 tabular-nums">
+                {formatTime(currentTime)}
+              </span>
+            </div>
+
+            {/* 중앙: 컨트롤 버튼들 */}
+            <div className="flex items-center gap-3">
+              {/* 처음으로 */}
               <button
                 onClick={handleReset}
                 className="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 transition-all active:scale-95 cursor-pointer"
                 aria-label="처음으로"
               >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="white" opacity="0.9">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="white" opacity="0.9">
                   <path d="M6 6h2v12H6zm3.5 6l8.5 6V6z" />
+                </svg>
+              </button>
+              
+              {/* 10초 뒤로 */}
+              <button
+                onClick={handleSkipBackward}
+                className="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 transition-all active:scale-95 cursor-pointer"
+                aria-label="10초 뒤로"
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+                  <path d="M11 19l-7-7 7-7m8 14l-7-7 7-7" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </button>
               
@@ -421,28 +555,46 @@ export default function SheetMusicPage() {
               {!isPlaying ? (
                 <button
                   onClick={handlePlay}
-                  className="w-12 h-12 flex items-center justify-center rounded-full bg-white/90 hover:bg-white transition-all hover:scale-105 active:scale-95 shadow-lg cursor-pointer flex-shrink-0"
+                  className="w-14 h-14 flex items-center justify-center rounded-full bg-white/90 hover:bg-white transition-all hover:scale-105 active:scale-95 shadow-lg cursor-pointer"
                   aria-label="재생"
                 >
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="#1f2937">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="#1f2937">
                     <path d="M8 5v14l11-7z" />
                   </svg>
                 </button>
               ) : (
                 <button
                   onClick={handlePause}
-                  className="w-12 h-12 flex items-center justify-center rounded-full bg-white/90 hover:bg-white transition-all hover:scale-105 active:scale-95 shadow-lg cursor-pointer flex-shrink-0"
+                  className="w-14 h-14 flex items-center justify-center rounded-full bg-white/90 hover:bg-white transition-all hover:scale-105 active:scale-95 shadow-lg cursor-pointer"
                   aria-label="정지"
                 >
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="#1f2937">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="#1f2937">
                     <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
                   </svg>
                 </button>
               )}
+              
+              {/* 10초 앞으로 */}
+              <button
+                onClick={handleSkipForward}
+                className="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 transition-all active:scale-95 cursor-pointer"
+                aria-label="10초 앞으로"
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+                  <path d="M13 5l7 7-7 7M5 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </button>
+            </div>
+
+            {/* 오른쪽: 전체 시간 */}
+            <div className="w-16 text-center">
+              <span className="text-sm font-medium text-white/90 tabular-nums">
+                {formatTime(duration)}
+              </span>
             </div>
           </div>
         </div>
-      </main>
+      </div>
     </div>
   );
 }
