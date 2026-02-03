@@ -126,6 +126,11 @@ export default function SheetMusicPage() {
       // ref 값을 먼저 초기화 (state 업데이트 전)
       lastActiveNoteIndexRef.current = -1;
       
+      // 오디오 시간을 0으로 리셋
+      if (audio) {
+        audio.currentTime = 0;
+      }
+      
       // state 업데이트 (useEffect 트리거)
       setIsPlaying(false);
       setCurrentTime(0);
@@ -153,7 +158,7 @@ export default function SheetMusicPage() {
 
     const noteElements = svgElement.querySelectorAll('.vf-stavenote[data-start-time]');
     
-    // 재생이 끝났거나 정지 상태에서 currentTime이 0이면 모든 하이라이트 제거
+    // 정지 상태 (처음으로/초기화)에서만 모든 하이라이트 제거
     if (!isPlaying && currentTime === 0) {
       noteElements.forEach((element) => {
         const existingHighlight = element.querySelector('.note-highlight');
@@ -187,8 +192,8 @@ export default function SheetMusicPage() {
       lastActiveNoteIndexRef.current = currentActiveIndex;
     }
     
-    // 활성 음표가 없으면 마지막 음표 사용
-    if (!activeNoteElement && lastActiveNoteIndexRef.current !== -1) {
+    // 활성 음표가 없으면 마지막 음표 사용 (재생 중이거나 일시정지 중)
+    if (!activeNoteElement && lastActiveNoteIndexRef.current !== -1 && currentTime > 0) {
       activeNoteElement = noteElements[lastActiveNoteIndexRef.current];
     }
     
@@ -200,8 +205,8 @@ export default function SheetMusicPage() {
       }
     });
     
-    // 활성 음표에 하이라이트 추가
-    if (activeNoteElement) {
+    // currentTime이 0보다 크면 하이라이트 추가 (재생 중이거나 일시정지 중)
+    if (activeNoteElement && currentTime > 0) {
       // 음표의 bounding box 가져오기
       const bbox = (activeNoteElement as SVGGraphicsElement).getBBox();
       
@@ -497,8 +502,27 @@ export default function SheetMusicPage() {
               </h1>
             </div>
 
-            {/* 오른쪽: 빈 공간 (대칭을 위해) */}
-            <div className="w-[43px]"></div>
+            {/* 오른쪽: 초기화 버튼 */}
+            <button
+              onClick={handleReset}
+              className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/10 transition-all active:scale-95 cursor-pointer"
+              aria-label="처음으로"
+            >
+              <svg 
+                className="w-5 h-5 text-white/90"
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+              >
+                <path 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round" 
+                  strokeWidth={2} 
+                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" 
+                />
+              </svg>
+              <span className="text-sm font-medium text-white/90 hidden sm:inline">처음으로</span>
+            </button>
           </div>
         </div>
       </div>
@@ -525,27 +549,16 @@ export default function SheetMusicPage() {
         <audio ref={audioRef} src={audioUrl} />
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-20">
-            {/* 왼쪽: 현재 시간 */}
-            <div className="w-16 text-center">
+          <div className="relative flex items-center justify-center h-20">
+            {/* 왼쪽: 현재 시간 (absolute) */}
+            <div className="absolute left-0 top-1/2 -translate-y-1/2 hidden sm:block">
               <span className="text-sm font-medium text-white/90 tabular-nums">
                 {formatTime(currentTime)}
               </span>
             </div>
 
-            {/* 중앙: 컨트롤 버튼들 */}
+            {/* 중앙: 재생 컨트롤 버튼들 (완벽한 중앙 배치) */}
             <div className="flex items-center gap-3">
-              {/* 처음으로 */}
-              <button
-                onClick={handleReset}
-                className="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 transition-all active:scale-95 cursor-pointer"
-                aria-label="처음으로"
-              >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="white" opacity="0.9">
-                  <path d="M6 6h2v12H6zm3.5 6l8.5 6V6z" />
-                </svg>
-              </button>
-              
               {/* 10초 뒤로 */}
               <button
                 onClick={handleSkipBackward}
@@ -592,8 +605,8 @@ export default function SheetMusicPage() {
               </button>
             </div>
 
-            {/* 오른쪽: 전체 시간 */}
-            <div className="w-16 text-center">
+            {/* 오른쪽: 전체 시간 (absolute) */}
+            <div className="absolute right-0 top-1/2 -translate-y-1/2 hidden sm:block">
               <span className="text-sm font-medium text-white/90 tabular-nums">
                 {formatTime(duration)}
               </span>
