@@ -330,82 +330,48 @@ export default function Home() {
                     <input
                       type="radio"
                       name="vocalType"
-                      value="female"
-                      checked={vocalType === "female"}
+                      value="male"
+                      checked={vocalType === "male"}
                       onChange={(e) => setVocalType(e.target.value as "female" | "male")}
                       className="peer sr-only"
                     />
-                    <div className="flex items-center gap-3 px-4 py-4 bg-white dark:bg-zinc-800 border-2 border-zinc-200 dark:border-zinc-700 rounded-xl transition-all hover:border-zinc-300 dark:hover:border-zinc-600 peer-checked:border-pink-500 peer-checked:bg-pink-50 dark:peer-checked:bg-pink-950/30 peer-checked:shadow-sm">
+                    <div className="flex items-center justify-center gap-2 px-3 py-4 bg-white dark:bg-zinc-800 border-2 border-zinc-200 dark:border-zinc-700 rounded-xl transition-all peer-checked:border-blue-500 peer-checked:bg-blue-50 dark:peer-checked:bg-blue-950/30 peer-checked:shadow-sm">
+                      {/* 남성 심볼 ♂ */}
                       <svg
-                        className="w-5 h-5 text-zinc-400 dark:text-zinc-500 peer-checked:text-pink-500"
-                        fill="none"
-                        stroke="currentColor"
+                        className="w-5 h-5 flex-shrink-0 text-zinc-400 dark:text-zinc-500 peer-checked:text-blue-500"
+                        fill="currentColor"
                         viewBox="0 0 24 24"
                       >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                        />
+                        <path d="M20 4v6h-2V7.425l-3.975 3.95q.475.7.725 1.488T15 14.5q0 2.3-1.6 3.9T9.5 20q-2.3 0-3.9-1.6T4 14.5q0-2.3 1.6-3.9T9.5 9q.825 0 1.625.237t1.475.738L16.575 6H14V4zM9.5 11q-1.45 0-2.475 1.025T6 14.5q0 1.45 1.025 2.475T9.5 18q1.45 0 2.475-1.025T13 14.5q0-1.45-1.025-2.475T9.5 11z"/>
                       </svg>
-                      <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300 peer-checked:text-pink-700 dark:peer-checked:text-pink-400">
-                        여성 보컬
+                      <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300 peer-checked:text-blue-700 dark:peer-checked:text-blue-400 whitespace-nowrap">
+                        <span className="hidden sm:inline">남성 보컬</span>
+                        <span className="sm:hidden">남성</span>
                       </span>
-                      {vocalType === "female" && (
-                        <svg
-                          className="w-5 h-5 text-pink-500 ml-auto"
-                          fill="currentColor"
-                          viewBox="0 0 20 20"
-                        >
-                          <path
-                            fillRule="evenodd"
-                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
-                      )}
                     </div>
                   </label>
                   <label className="relative cursor-pointer">
                     <input
                       type="radio"
                       name="vocalType"
-                      value="male"
-                      checked={vocalType === "male"}
+                      value="female"
+                      checked={vocalType === "female"}
                       onChange={(e) => setVocalType(e.target.value as "female" | "male")}
                       className="peer sr-only"
                     />
-                    <div className="flex items-center gap-3 px-4 py-4 bg-white dark:bg-zinc-800 border-2 border-zinc-200 dark:border-zinc-700 rounded-xl transition-all hover:border-zinc-300 dark:hover:border-zinc-600 peer-checked:border-blue-500 peer-checked:bg-blue-50 dark:peer-checked:bg-blue-950/30 peer-checked:shadow-sm">
+                    <div className="flex items-center justify-center gap-2 px-3 py-4 bg-white dark:bg-zinc-800 border-2 border-zinc-200 dark:border-zinc-700 rounded-xl transition-all peer-checked:border-pink-500 peer-checked:bg-pink-50 dark:peer-checked:bg-pink-950/30 peer-checked:shadow-sm">
+                      {/* 여성 심볼 ♀ */}
                       <svg
-                        className="w-5 h-5 text-zinc-400 dark:text-zinc-500 peer-checked:text-blue-500"
-                        fill="none"
-                        stroke="currentColor"
+                        className="w-5 h-5 flex-shrink-0 text-zinc-400 dark:text-zinc-500 peer-checked:text-pink-500"
+                        fill="currentColor"
                         viewBox="0 0 24 24"
                       >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                        />
+                        <path d="M12 2q2.075 0 3.538 1.462T17 7q0 1.8-1.137 3.175T13 11.9V14h2v2h-2v4h-2v-4H9v-2h2v-2.1q-1.725-.325-2.862-1.7T7 7q0-2.075 1.463-3.537T12 2m0 2Q10.75 4 9.875 4.875T9 7q0 1.25.875 2.125T12 10q1.25 0 2.125-.875T15 7q0-1.25-.875-2.125T12 4z"/>
                       </svg>
-                      <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300 peer-checked:text-blue-700 dark:peer-checked:text-blue-400">
-                        남성 보컬
+                      <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300 peer-checked:text-pink-700 dark:peer-checked:text-pink-400 whitespace-nowrap">
+                        <span className="hidden sm:inline">여성 보컬</span>
+                        <span className="sm:hidden">여성</span>
                       </span>
-                      {vocalType === "male" && (
-                        <svg
-                          className="w-5 h-5 text-blue-500 ml-auto"
-                          fill="currentColor"
-                          viewBox="0 0 20 20"
-                        >
-                          <path
-                            fillRule="evenodd"
-                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
-                      )}
                     </div>
                   </label>
                 </div>
