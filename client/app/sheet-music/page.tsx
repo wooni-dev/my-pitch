@@ -390,14 +390,14 @@ export default function SheetMusicPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-black font-sans">
       <main className="flex min-h-screen w-full max-w-7xl flex-col items-center justify-center py-4 px-4">
-        <div className="w-full bg-[#c8dae6] rounded-lg shadow-xl p-8">
+        <div className="w-full bg-white rounded-lg shadow-xl p-8">
           <div className="text-center mb-6">
             <h1 className="text-3xl font-bold text-gray-800">{title}</h1>
           </div>
           
           <div 
             ref={containerRef} 
-            className="w-full bg-[#c8dae6]"
+            className="w-full bg-white"
           />
           
           {/* 플로팅 오디오 컨트롤 버튼 - 오른쪽 하단 고정 */}
