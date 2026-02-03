@@ -8,6 +8,7 @@ import { initializeRenderer } from "./utils/rendererUtils";
 import { renderStaveGrid } from "./utils/staveGridUtils";
 import { convertApiDataToStaves } from "./utils/noteConverter";
 import type { ApiSheetMusicData } from "./utils/noteConverter";
+import UploadingModal from "../components/UploadingModal";
 
 export default function SheetMusicPage() {
   const router = useRouter();
@@ -383,11 +384,7 @@ export default function SheetMusicPage() {
   
   // 데이터가 없으면 로딩 표시
   if (!sheetMusicData) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-black font-sans">
-        <div className="text-white">로딩 중...</div>
-      </div>
-    );
+    return <UploadingModal isOpen={true} title="악보 불러오는 중" message="잠시만 기다려주세요..." />;
   }
 
   return (

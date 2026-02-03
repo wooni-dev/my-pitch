@@ -3,6 +3,7 @@
 import { useState, useRef, DragEvent, ChangeEvent } from "react";
 import { useRouter } from "next/navigation";
 import { API_BASE_URL, MAX_FILE_SIZE_MB, MAX_FILE_SIZE, AUDIO_FILE_EXTENSIONS } from "./constants";
+import UploadingModal from "./components/UploadingModal";
 
 export default function Home() {
   const router = useRouter();
@@ -147,68 +148,7 @@ export default function Home() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
       {/* 업로드 중 모달 */}
-      {isUploading && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-          <style dangerouslySetInnerHTML={{
-            __html: `
-              @keyframes spinner-rotate {
-                0% { transform: rotate(0deg); }
-                100% { transform: rotate(360deg); }
-              }
-              @keyframes spinner-dash {
-                0% {
-                  stroke-dasharray: 1, 150;
-                  stroke-dashoffset: 0;
-                }
-                50% {
-                  stroke-dasharray: 90, 150;
-                  stroke-dashoffset: -35;
-                }
-                100% {
-                  stroke-dasharray: 90, 150;
-                  stroke-dashoffset: -124;
-                }
-              }
-            `
-          }} />
-          <div className="bg-white dark:bg-zinc-900 rounded-2xl p-8 shadow-2xl border border-zinc-200 dark:border-zinc-800 max-w-sm w-full mx-4">
-            <div className="flex flex-col items-center space-y-4">
-              {/* 로딩 스피너 */}
-              <div className="relative w-16 h-16">
-                <svg 
-                  className="w-full h-full"
-                  viewBox="0 0 50 50"
-                  style={{
-                    animation: 'spinner-rotate 2s linear infinite'
-                  }}
-                >
-                  <circle
-                    cx="25"
-                    cy="25"
-                    r="20"
-                    fill="none"
-                    stroke="#3b82f6"
-                    strokeWidth="4"
-                    strokeLinecap="round"
-                    style={{
-                      animation: 'spinner-dash 1.5s ease-in-out infinite'
-                    }}
-                  />
-                </svg>
-              </div>
-              {/* 메시지 */}
-              <div className="text-center">
-                <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-2">
-                  악보로 변환 중입니다
-                </h3>
-                <p className="text-sm text-zinc-600 dark:text-zinc-400">
-                  잠시만 기다려주세요...
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <UploadingModal isOpen={isUploading} />
 
       <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-center py-32 px-16 bg-white dark:bg-black">
         <div className="w-full max-w-2xl space-y-8">
