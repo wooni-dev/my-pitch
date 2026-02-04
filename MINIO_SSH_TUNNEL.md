@@ -122,7 +122,7 @@ SSH 연결 종료
 
 ---
 
-## 방법 2: 한 줄 명령어
+## 방법 3: 한 줄 명령어 (gcloud)
 
 SSH 연결과 동시에 터널 컨테이너를 실행하고, 연결 종료 시 자동 정리:
 
@@ -189,3 +189,9 @@ docker network ls | grep my-pitch
 # 컨테이너가 실행 중인지 확인
 docker ps | grep fileserver
 ```
+
+---
+
+## 참고 자료
+
+- [socat 공식 문서](http://www.dest-unreach.org/socat/doc/socat.html)
