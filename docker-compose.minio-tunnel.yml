@@ -1,0 +1,14 @@
+services:
+  minio-tunnel:
+    image: alpine/socat
+    container_name: minio-tunnel
+    command: TCP-LISTEN:9001,fork,reuseaddr TCP:fileserver:9001
+    ports:
+      - "127.0.0.1:9001:9001"
+    networks:
+      - my-pitch-network
+    restart: "no"
+
+networks:
+  my-pitch-network:
+    external: true
