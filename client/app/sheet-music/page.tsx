@@ -527,8 +527,8 @@ export default function SheetMusicPage() {
         </div>
       </div>
 
-      <main className="flex min-h-screen w-full max-w-7xl flex-col items-center justify-center py-4 px-4 pt-20 pb-28">
-        <div className="w-full bg-white rounded-lg shadow-xl p-8 mb-8">
+      <main className="flex min-h-screen w-full max-w-7xl flex-col items-center justify-center py-4 px-4 pt-20 pb-24">
+        <div className="w-full bg-white rounded-lg shadow-xl p-8">
           {/* 악보 제목 */}
           <div className="text-center mb-8">
             <h1 ref={titleRef} className="text-3xl font-bold text-gray-800">
@@ -551,7 +551,7 @@ export default function SheetMusicPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="relative flex items-center justify-center h-20">
             {/* 왼쪽: 현재 시간 (absolute) */}
-            <div className="absolute left-0 top-1/2 -translate-y-1/2 hidden sm:block">
+            <div className="absolute left-0 top-1/2 -translate-y-1/2">
               <span className="text-sm font-medium text-white/90 tabular-nums">
                 {formatTime(currentTime)}
               </span>
@@ -606,7 +606,7 @@ export default function SheetMusicPage() {
             </div>
 
             {/* 오른쪽: 전체 시간 (absolute) */}
-            <div className="absolute right-0 top-1/2 -translate-y-1/2 hidden sm:block">
+            <div className="absolute right-0 top-1/2 -translate-y-1/2">
               <span className="text-sm font-medium text-white/90 tabular-nums">
                 {formatTime(duration)}
               </span>
