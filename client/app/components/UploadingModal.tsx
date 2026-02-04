@@ -35,11 +35,11 @@ export default function UploadingModal({
           }
         `
       }} />
-      <div className="bg-white dark:bg-zinc-900 rounded-2xl p-8 shadow-2xl border border-zinc-200 dark:border-zinc-800 max-w-sm w-full mx-4">
+      <div className="bg-zinc-900 rounded-2xl p-8 shadow-2xl border border-zinc-800 max-w-sm w-full mx-4">
         <div className="flex flex-col items-center space-y-4">
           {/* 로딩 스피너 */}
           <div className="relative w-16 h-16">
-            <svg 
+            <svg
               className="w-full h-full"
               viewBox="0 0 50 50"
               style={{
@@ -62,10 +62,10 @@ export default function UploadingModal({
           </div>
           {/* 메시지 */}
           <div className="text-center">
-            <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-2">
+            <h3 className="text-lg font-semibold text-zinc-100 mb-2">
               {title}
             </h3>
-            <p className="text-sm text-zinc-600 dark:text-zinc-400">
+            <p className="text-sm text-zinc-400">
               {message}
             </p>
           </div>
