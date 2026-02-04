@@ -7,11 +7,11 @@
 set -e
 
 # ========================================
-# 설정 (필요에 따라 수정)
+# .env 파일 로드
 # ========================================
-domains=(my-pitch.work api.my-pitch.work files.my-pitch.work)  # 인증서를 발급할 도메인 목록
-email="wooni.dev@gmail.com"  # Let's Encrypt 알림용 이메일 (인증서 만료 알림 등)
-staging=0  # 테스트용: 1, 실제 운영: 0 (staging은 발급 횟수 제한 없음)
+if [ -f ".env" ]; then
+    export $(cat .env | grep -v '^#' | xargs)
+fi
 
 # 색상 정의
 RED='\033[0;31m'
@@ -19,13 +19,31 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
-echo -e "${GREEN}=== Let's Encrypt SSL 인증서 발급 시작 ===${NC}"
-
-# 이메일 주소 확인
-if [ "$email" = "your-email@example.com" ]; then
-    echo -e "${RED}오류: 스크립트에서 이메일 주소를 설정해주세요!${NC}"
+# ========================================
+# 환경변수 검증
+# ========================================
+if [ -z "$SSL_DOMAINS" ]; then
+    echo -e "${RED}오류: SSL_DOMAINS 환경변수가 설정되지 않았습니다.${NC}"
+    echo -e "${YELLOW}.env 파일에 SSL_DOMAINS를 설정해주세요.${NC}"
+    echo -e "${YELLOW}예: SSL_DOMAINS=\"my-pitch.work api.my-pitch.work files.my-pitch.work\"${NC}"
     exit 1
 fi
+
+if [ -z "$SSL_EMAIL" ]; then
+    echo -e "${RED}오류: SSL_EMAIL 환경변수가 설정되지 않았습니다.${NC}"
+    echo -e "${YELLOW}.env 파일에 SSL_EMAIL을 설정해주세요.${NC}"
+    echo -e "${YELLOW}예: SSL_EMAIL=\"your-email@example.com\"${NC}"
+    exit 1
+fi
+
+# ========================================
+# 설정 (.env 환경변수 사용)
+# ========================================
+domains=($SSL_DOMAINS)  # 인증서를 발급할 도메인 목록
+email="$SSL_EMAIL"  # Let's Encrypt 알림용 이메일 (인증서 만료 알림 등)
+staging=0  # 테스트용: 1, 실제 운영: 0 (staging은 발급 횟수 제한 없음)
+
+echo -e "${GREEN}=== Let's Encrypt SSL 인증서 발급 시작 ===${NC}"
 
 # ========================================
 # 필요한 디렉토리 생성
