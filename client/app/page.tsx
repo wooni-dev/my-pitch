@@ -147,47 +147,47 @@ export default function Home() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
+    <div className="flex min-h-screen items-center justify-center bg-black font-sans">
       {/* 업로드 중 모달 */}
       <UploadingModal isOpen={isUploading} />
 
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-center py-32 px-16 bg-white dark:bg-black">
+      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-center py-32 px-16 bg-black">
         <div className="w-full max-w-2xl space-y-8">
           <div className="text-center">
-            <h1 className="text-4xl font-bold leading-tight tracking-tight text-black dark:text-zinc-50 mb-4">
+            <h1 className="text-4xl font-bold leading-tight tracking-tight text-zinc-50 mb-4">
               My Pitch
             </h1>
-            <p className="text-lg leading-8 text-zinc-600 dark:text-zinc-400 mb-6">
+            <p className="text-lg leading-8 text-zinc-400 mb-6">
               부른 노래를 업로드하면 내 음정을 악보로 확인할 수 있어요
             </p>
           </div>
 
           {/* 사용 안내 - Accordion */}
-          <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900 rounded-xl overflow-hidden">
+          <div className="bg-blue-950/20 border border-blue-900 rounded-xl overflow-hidden">
             <button
               onClick={() => setIsGuideOpen(!isGuideOpen)}
-              className="w-full p-4 flex items-center justify-between hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors cursor-pointer"
+              className="w-full p-4 flex items-center justify-between hover:bg-blue-900/30 transition-colors cursor-pointer"
             >
               <div className="flex items-center gap-3">
-                <svg 
-                  className="w-6 h-6 text-blue-600 dark:text-blue-400 flex-shrink-0" 
-                  fill="none" 
-                  stroke="currentColor" 
+                <svg
+                  className="w-6 h-6 text-blue-400 flex-shrink-0"
+                  fill="none"
+                  stroke="currentColor"
                   viewBox="0 0 24 24"
                 >
-                  <path 
-                    strokeLinecap="round" 
-                    strokeLinejoin="round" 
-                    strokeWidth={2} 
-                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" 
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                   />
                 </svg>
-                <h2 className="text-lg font-semibold text-blue-900 dark:text-blue-300">
+                <h2 className="text-lg font-semibold text-blue-300">
                   사용 안내
                 </h2>
               </div>
-              <svg 
-                className={`w-5 h-5 text-blue-600 dark:text-blue-400 transition-transform ${isGuideOpen ? 'rotate-180' : ''}`}
+              <svg
+                className={`w-5 h-5 text-blue-400 transition-transform ${isGuideOpen ? 'rotate-180' : ''}`}
                 fill="none" 
                 stroke="currentColor" 
                 viewBox="0 0 24 24"
@@ -203,25 +203,25 @@ export default function Home() {
             
             <div className={`transition-all duration-300 ease-in-out ${isGuideOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'} overflow-hidden`}>
               <div className="px-4 pb-4 pt-2 space-y-4">
-                <p className="text-sm text-blue-800 dark:text-blue-300">
+                <p className="text-sm text-blue-300">
                   노래방에서 녹음한 음성으로 음높이를 확인하기 위한 서비스입니다
                 </p>
-                
-                <div className="space-y-2 text-sm text-blue-800 dark:text-blue-300">
+
+                <div className="space-y-2 text-sm text-blue-300">
                   <div className="flex items-start gap-2">
-                    <span className="text-blue-600 dark:text-blue-400 font-bold">•</span>
+                    <span className="text-blue-400 font-bold">•</span>
                     <span>악보는 <strong>노래방 악보처럼 간소화</strong>되어 표시됩니다</span>
                   </div>
                   <div className="flex items-start gap-2">
-                    <span className="text-blue-600 dark:text-blue-400 font-bold">•</span>
+                    <span className="text-blue-400 font-bold">•</span>
                     <span>박자는 <strong>4/4박자로 고정</strong>되어 있습니다</span>
                   </div>
                   <div className="flex items-start gap-2">
-                    <span className="text-blue-600 dark:text-blue-400 font-bold">•</span>
+                    <span className="text-blue-400 font-bold">•</span>
                     <span>모든 음표는 <strong>높은음자리표(G clef)로 통일</strong>되어 표시됩니다</span>
                   </div>
                   <div className="flex items-start gap-2">
-                    <span className="text-blue-600 dark:text-blue-400 font-bold">•</span>
+                    <span className="text-blue-400 font-bold">•</span>
                     <span>복잡한 악보 규칙은 생략되어 <strong>음높이 확인에만 집중</strong>할 수 있습니다</span>
                   </div>
                 </div>
@@ -233,8 +233,8 @@ export default function Home() {
             <div
               className={`relative border-2 border-dashed rounded-xl p-12 transition-all ${
                 isDragging
-                  ? "border-blue-500 bg-blue-50 dark:bg-blue-950/20"
-                  : "border-zinc-300 dark:border-zinc-700 hover:border-zinc-400 dark:hover:border-zinc-600"
+                  ? "border-blue-500 bg-blue-950/20"
+                  : "border-zinc-700 hover:border-zinc-600"
               }`}
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
@@ -253,7 +253,7 @@ export default function Home() {
                 className="flex flex-col items-center justify-center cursor-pointer"
               >
                 <svg
-                  className="w-16 h-16 mb-4 text-zinc-400 dark:text-zinc-600"
+                  className="w-16 h-16 mb-4 text-zinc-500"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -265,10 +265,10 @@ export default function Home() {
                     d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"
                   />
                 </svg>
-                <p className="text-lg font-medium text-zinc-700 dark:text-zinc-300 mb-2">
+                <p className="text-lg font-medium text-zinc-300 mb-2">
                   음악 파일을 클릭하거나 드래그하여 선택
                 </p>
-                <p className="text-sm text-zinc-500 dark:text-zinc-500">
+                <p className="text-sm text-zinc-500">
                   WAV, MP3, FLAC, OGG 지원 · 최대 {MAX_FILE_SIZE_MB}MB
                 </p>
               </label>
@@ -276,14 +276,14 @@ export default function Home() {
           )}
 
           {selectedFile && (
-            <div className="bg-zinc-50 dark:bg-zinc-900 rounded-lg p-6 border border-zinc-200 dark:border-zinc-800 space-y-6">
+            <div className="bg-zinc-900 rounded-lg p-6 border border-zinc-800 space-y-6">
               {/* 파일 정보 */}
               <div className="flex items-center justify-between">
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100 truncate">
+                  <p className="text-sm font-medium text-zinc-100 truncate">
                     {selectedFile.name}
                   </p>
-                  <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
+                  <p className="text-sm text-zinc-400 mt-1">
                     {formatFileSize(selectedFile.size)}
                   </p>
                 </div>
@@ -295,7 +295,7 @@ export default function Home() {
                       fileInputRef.current.value = "";
                     }
                   }}
-                  className="ml-4 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 cursor-pointer"
+                  className="ml-4 text-zinc-400 hover:text-zinc-300 cursor-pointer"
                   aria-label="파일 제거"
                 >
                   <svg
@@ -315,14 +315,14 @@ export default function Home() {
               </div>
 
               {/* 구분선 */}
-              <div className="border-t border-zinc-200 dark:border-zinc-800"></div>
+              <div className="border-t border-zinc-800"></div>
 
               {/* 음역대 선택 */}
               <div>
-                <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100 mb-1">
+                <p className="text-sm font-medium text-zinc-100 mb-1">
                   부르는 사람의 음역대
                 </p>
-                <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-4">
+                <p className="text-xs text-zinc-400 mb-4">
                   원곡이 아닌, 실제로 녹음된 목소리를 기준으로 선택하세요
                 </p>
                 <div className="grid grid-cols-2 gap-3">
@@ -335,16 +335,16 @@ export default function Home() {
                       onChange={(e) => setVocalType(e.target.value as "female" | "male")}
                       className="peer sr-only"
                     />
-                    <div className="flex items-center justify-center gap-2 px-3 py-4 bg-white dark:bg-zinc-800 border-2 border-zinc-200 dark:border-zinc-700 rounded-xl transition-all peer-checked:border-blue-500 peer-checked:bg-blue-50 dark:peer-checked:bg-blue-950/30 peer-checked:shadow-sm">
+                    <div className="flex items-center justify-center gap-2 px-3 py-4 bg-zinc-800 border-2 border-zinc-700 rounded-xl transition-all peer-checked:border-blue-500 peer-checked:bg-blue-950/30 peer-checked:shadow-sm">
                       {/* 남성 심볼 ♂ */}
                       <svg
-                        className="w-5 h-5 flex-shrink-0 text-zinc-400 dark:text-zinc-500 peer-checked:text-blue-500"
+                        className="w-5 h-5 flex-shrink-0 text-zinc-500 peer-checked:text-blue-500"
                         fill="currentColor"
                         viewBox="0 0 24 24"
                       >
                         <path d="M20 4v6h-2V7.425l-3.975 3.95q.475.7.725 1.488T15 14.5q0 2.3-1.6 3.9T9.5 20q-2.3 0-3.9-1.6T4 14.5q0-2.3 1.6-3.9T9.5 9q.825 0 1.625.237t1.475.738L16.575 6H14V4zM9.5 11q-1.45 0-2.475 1.025T6 14.5q0 1.45 1.025 2.475T9.5 18q1.45 0 2.475-1.025T13 14.5q0-1.45-1.025-2.475T9.5 11z"/>
                       </svg>
-                      <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300 peer-checked:text-blue-700 dark:peer-checked:text-blue-400 whitespace-nowrap">
+                      <span className="text-sm font-medium text-zinc-300 peer-checked:text-blue-400 whitespace-nowrap">
                         <span className="hidden sm:inline">남성 보컬</span>
                         <span className="sm:hidden">남성</span>
                       </span>
@@ -359,16 +359,16 @@ export default function Home() {
                       onChange={(e) => setVocalType(e.target.value as "female" | "male")}
                       className="peer sr-only"
                     />
-                    <div className="flex items-center justify-center gap-2 px-3 py-4 bg-white dark:bg-zinc-800 border-2 border-zinc-200 dark:border-zinc-700 rounded-xl transition-all peer-checked:border-pink-500 peer-checked:bg-pink-50 dark:peer-checked:bg-pink-950/30 peer-checked:shadow-sm">
+                    <div className="flex items-center justify-center gap-2 px-3 py-4 bg-zinc-800 border-2 border-zinc-700 rounded-xl transition-all peer-checked:border-pink-500 peer-checked:bg-pink-950/30 peer-checked:shadow-sm">
                       {/* 여성 심볼 ♀ */}
                       <svg
-                        className="w-5 h-5 flex-shrink-0 text-zinc-400 dark:text-zinc-500 peer-checked:text-pink-500"
+                        className="w-5 h-5 flex-shrink-0 text-zinc-500 peer-checked:text-pink-500"
                         fill="currentColor"
                         viewBox="0 0 24 24"
                       >
                         <path d="M12 2q2.075 0 3.538 1.462T17 7q0 1.8-1.137 3.175T13 11.9V14h2v2h-2v4h-2v-4H9v-2h2v-2.1q-1.725-.325-2.862-1.7T7 7q0-2.075 1.463-3.537T12 2m0 2Q10.75 4 9.875 4.875T9 7q0 1.25.875 2.125T12 10q1.25 0 2.125-.875T15 7q0-1.25-.875-2.125T12 4z"/>
                       </svg>
-                      <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300 peer-checked:text-pink-700 dark:peer-checked:text-pink-400 whitespace-nowrap">
+                      <span className="text-sm font-medium text-zinc-300 peer-checked:text-pink-400 whitespace-nowrap">
                         <span className="hidden sm:inline">여성 보컬</span>
                         <span className="sm:hidden">여성</span>
                       </span>
@@ -378,7 +378,7 @@ export default function Home() {
               </div>
 
               {/* 구분선 */}
-              <div className="border-t border-zinc-200 dark:border-zinc-800"></div>
+              <div className="border-t border-zinc-800"></div>
 
               {/* 다른 파일 선택 버튼 */}
               <div>
@@ -391,7 +391,7 @@ export default function Home() {
                 />
                 <label
                   htmlFor="file-change"
-                  className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-750 cursor-pointer transition-colors"
+                  className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-zinc-300 bg-zinc-800 border border-zinc-700 rounded-lg hover:bg-zinc-750 cursor-pointer transition-colors"
                 >
                   <svg
                     className="w-4 h-4"
@@ -413,8 +413,8 @@ export default function Home() {
           )}
 
           {errorMessage && (
-            <div className="bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
-              <p className="text-sm font-medium text-red-800 dark:text-red-300">
+            <div className="bg-red-950/20 border border-red-800 rounded-lg p-4">
+              <p className="text-sm font-medium text-red-300">
                 {errorMessage}
               </p>
             </div>
@@ -425,8 +425,8 @@ export default function Home() {
             disabled={!selectedFile || !vocalType || isUploading}
             className={`w-full h-12 rounded-full font-medium transition-colors ${
               selectedFile && vocalType && !isUploading
-                ? "bg-black text-white hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-200 cursor-pointer"
-                : "bg-zinc-200 text-zinc-400 cursor-not-allowed dark:bg-zinc-800 dark:text-zinc-600"
+                ? "bg-white text-black hover:bg-zinc-200 cursor-pointer"
+                : "bg-zinc-800 text-zinc-600 cursor-not-allowed"
             }`}
           >
             {isUploading ? "변환 중..." : "악보로 변환"}
