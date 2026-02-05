@@ -6,9 +6,9 @@ services:
     ports:
       - "127.0.0.1:9001:9001"
     networks:
-      - my-pitch-network
+      - my-pitch_my-pitch-network
     restart: "no"
 
 networks:
-  my-pitch-network:
+  my-pitch_my-pitch-network:
     external: true
