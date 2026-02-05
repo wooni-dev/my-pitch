@@ -119,3 +119,9 @@ docker network ls | grep my-pitch
 # 메인 앱이 실행 중인지 확인
 docker compose ls
 ```
+
+---
+
+## 참고 자료
+
+- [socat 공식 문서](http://www.dest-unreach.org/socat/doc/socat.html) - `docker-compose.minio-tunnel.yml` 5번 줄 `command` 명령어 참고
