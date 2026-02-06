@@ -14,6 +14,7 @@ SEPARATED_BUCKET = os.environ.get('SEPARATED_BUCKET', 'separated-tracks')  # voc
 # 파일 업로드 설정 (demucs 호환 형식만 지원)
 ALLOWED_EXTENSIONS = {'wav', 'mp3', 'flac', 'ogg'}
 MAX_FILE_SIZE_MB = int(os.environ.get('MAX_FILE_SIZE_MB', '7'))
+MAX_QUEUE_SIZE = int(os.environ.get('MAX_QUEUE_SIZE', '3'))
 
 # 음원 분리 방식 설정
 # True: 외부 서버(Colab) 사용 (개발 환경)
