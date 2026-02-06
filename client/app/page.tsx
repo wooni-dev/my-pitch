@@ -1,9 +1,12 @@
 "use client";
 
-import { useState, useRef, DragEvent, ChangeEvent } from "react";
+import { useState, useRef, DragEvent, ChangeEvent, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { API_BASE_URL, MAX_FILE_SIZE_MB, MAX_FILE_SIZE, AUDIO_FILE_EXTENSIONS } from "./constants";
 import UploadingModal from "./components/UploadingModal";
+
+// Polling 간격 (3초)
+const POLLING_INTERVAL = 3000;
 
 export default function Home() {
   const router = useRouter();
@@ -13,7 +16,54 @@ export default function Home() {
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [vocalType, setVocalType] = useState<"female" | "male" | null>(null);
   const [isGuideOpen, setIsGuideOpen] = useState(false);
+  const [statusMessage, setStatusMessage] = useState<string>("잠시만 기다려주세요...");
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // 작업 상태 polling
+  const pollJobStatus = useCallback(async (jobId: string) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/jobs/${jobId}/status`);
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "상태 조회에 실패했습니다.");
+      }
+
+      // 상태에 따른 처리
+      switch (data.status) {
+        case "waiting":
+          setStatusMessage(data.message || `현재 대기 인원 중 ${data.position}번째입니다.`);
+          // 계속 polling
+          setTimeout(() => pollJobStatus(jobId), POLLING_INTERVAL);
+          break;
+
+        case "processing":
+          setStatusMessage(data.message || "악보 분석 중입니다...");
+          // 계속 polling
+          setTimeout(() => pollJobStatus(jobId), POLLING_INTERVAL);
+          break;
+
+        case "completed":
+          // 완료 - 결과 저장하고 페이지 이동
+          sessionStorage.setItem("sheetMusicData", JSON.stringify(data.result));
+          router.push("/sheet-music");
+          break;
+
+        case "failed":
+          // 실패
+          setErrorMessage(data.error || "악보 변환에 실패했습니다.");
+          setIsUploading(false);
+          break;
+
+        default:
+          throw new Error("알 수 없는 상태입니다.");
+      }
+    } catch (error) {
+      console.error("Polling error:", error);
+      setErrorMessage(error instanceof Error ? error.message : "상태 조회 중 오류가 발생했습니다.");
+      setIsUploading(false);
+    }
+  }, [router]);
   
   const isAudioFile = (file: File): boolean => {
     const fileName = file.name.toLowerCase();
@@ -106,6 +156,7 @@ export default function Home() {
 
     setIsUploading(true);
     setErrorMessage("");
+    setStatusMessage("파일 업로드 중...");
 
     try {
       const formData = new FormData();
@@ -117,24 +168,25 @@ export default function Home() {
         body: formData,
       });
 
-      if (response.ok) {
-        const data = await response.json();
-        
-        // sessionStorage에 임시 저장 (브라우저 탭 닫으면 자동 삭제됨)
-        sessionStorage.setItem('sheetMusicData', JSON.stringify(data));
-        
-        // 업로드 성공 후 즉시 sheet-music 페이지로 리다이렉트
-        // 모달을 유지한 채로 페이지 이동 (setIsUploading(false) 하지 않음)
-        router.push("/sheet-music");
+      const data = await response.json();
+
+      if (response.status === 202) {
+        // 작업이 대기열에 추가됨 - polling 시작
+        setStatusMessage(data.message || "대기열에 추가되었습니다.");
+        pollJobStatus(data.job_id);
+      } else if (response.status === 503) {
+        // 대기열 가득 참
+        setErrorMessage(data.message || "현재 대기열이 가득 찼습니다. 잠시 후 다시 시도해주세요.");
+        setIsUploading(false);
       } else {
-        const errorData = await response.json().catch(() => ({}));
-        setErrorMessage(errorData.message || "업로드에 실패했습니다.");
-        setIsUploading(false); // 실패 시에만 모달 닫기
+        // 기타 에러
+        setErrorMessage(data.message || "업로드에 실패했습니다.");
+        setIsUploading(false);
       }
     } catch (error) {
       console.error("Upload error:", error);
       setErrorMessage("서버와 통신 중 오류가 발생했습니다.");
-      setIsUploading(false); // 에러 시에만 모달 닫기
+      setIsUploading(false);
     }
   };
 
@@ -148,8 +200,8 @@ export default function Home() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-black font-sans">
-      {/* 업로드 중 모달 */}
-      <UploadingModal isOpen={isUploading} />
+      {/* 업로드/대기 중 모달 */}
+      <UploadingModal isOpen={isUploading} message={statusMessage} />
 
       <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-center py-32 px-16 bg-black">
         <div className="w-full max-w-2xl space-y-8">
