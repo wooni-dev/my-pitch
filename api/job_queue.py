@@ -30,6 +30,7 @@ from storage import generate_presigned_url
 job_queue = {}          # {job_id: {status, position, result, file_info, ...}}
 waiting_list = deque()  # 대기 중인 job_id 순서
 queue_lock = threading.Lock()  # 스레드 안전을 위한 락
+job_event = threading.Event()  # 작업 도착 신호 (polling 대신 사용)
 worker_thread = None
 minio_client = None     # app.py에서 설정
 
@@ -85,8 +86,9 @@ def create_job(file_info: dict, vocal_type: str) -> dict:
         waiting_list.append(job_id)
         position = len(waiting_list)
 
-    # 워커 시작
+    # 워커 시작 및 작업 도착 신호
     start_worker()
+    job_event.set()  # Worker 쓰레드에 "작업 도착" 신호
 
     return {
         'job_id': job_id,
@@ -212,28 +214,34 @@ def process_job(job_id: str):
 
 
 def process_worker():
-    """백그라운드에서 대기열 순차 처리"""
+    """백그라운드에서 대기열 순차 처리 (Event 기반)"""
     while True:
-        job_id = None
+        # 작업 도착 신호 대기 (CPU 사용 0)
+        job_event.wait()
 
-        with queue_lock:
-            if waiting_list:
-                job_id = waiting_list[0]
-                if job_id in job_queue:
-                    job_queue[job_id]['status'] = 'processing'
+        while True:
+            job_id = None
 
-        if job_id is None:
-            # 대기열이 비어있으면 1초 대기
-            threading.Event().wait(1)
-            continue
+            with queue_lock:
+                if waiting_list:
+                    job_id = waiting_list[0]
+                    if job_id in job_queue:
+                        job_queue[job_id]['status'] = 'processing'
+                else:
+                    # 대기열 비어있으면 신호 초기화 후 대기 상태로
+                    job_event.clear()
+                    break
 
-        # 작업 처리
-        process_job(job_id)
+            if job_id is None:
+                break
 
-        # 완료 후 대기열에서 제거
-        with queue_lock:
-            if waiting_list and waiting_list[0] == job_id:
-                waiting_list.popleft()
+            # 작업 처리
+            process_job(job_id)
+
+            # 완료 후 대기열에서 제거
+            with queue_lock:
+                if waiting_list and waiting_list[0] == job_id:
+                    waiting_list.popleft()
 
 
 def start_worker():
