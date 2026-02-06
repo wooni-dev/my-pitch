@@ -43,6 +43,8 @@ services:
       - SEPARATED_BUCKET=${SEPARATED_BUCKET:-separated-tracks}
       # 파일 업로드 설정
       - MAX_FILE_SIZE_MB=${MAX_FILE_SIZE_MB:-7}
+      # 작업 대기열 설정
+      - MAX_QUEUE_SIZE=${MAX_QUEUE_SIZE:-3}
       # 음원 분리 방식 (분기 로직용, dev/prod 환경 파일에서 override)
       - USE_EXTERNAL_SEPARATOR=${USE_EXTERNAL_SEPARATOR:-False}
       - TZ=${TZ:-Asia/Seoul}

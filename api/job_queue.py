@@ -12,11 +12,9 @@ from minio import Minio
 
 from config import (
     ORIGINAL_BUCKET,
-    USE_EXTERNAL_SEPARATOR
+    USE_EXTERNAL_SEPARATOR,
+    MAX_QUEUE_SIZE
 )
-
-# 최대 대기 인원
-MAX_QUEUE_SIZE = 3
 from services import (
     send_file_to_analysis_server,
     analyze_vocal_pitch_from_minio,
