@@ -92,74 +92,44 @@
 #### 개발 환경 (외부 서버 사용)
 > GPU 없는 로컬 환경에서 외부 Colab 서버로 음원 분리 요청
 
-```
-┌─────────────┐
-│   Client    │  Next.js (React) - 악보 렌더링 및 오디오 플레이어
-│  (Browser)  │  - 3초 폴링으로 작업 상태 조회
-└──────┬──────┘
-       │ HTTP
-┌──────▼──────┐
-│    Nginx    │  리버스 프록시, 라우팅
-│   (Proxy)   │
-└──────┬──────┘
-       │
-   ┌───┴───────────┬─────────┐
-   │               │         │
-┌──▼───────────┐ ┌─▼────┐ ┌──▼───────┐
-│  Flask API   │ │Client│ │  MinIO   │  오브젝트 스토리지
-│              │ │Next  │ │(Storage) │  - 원본 파일만 저장
-│ ┌──────────┐ │ └──────┘ └──────────┘
-│ │ Job Queue│ │  인메모리 작업 대기열
-│ │  (deque) │ │  - 순차 처리
-│ │          │ │  - 대기열 제한 (MAX: 3명)
-│ │ [Job1]   │ │  - 이벤트 기반 워커
-│ │ [Job2]   │ │
-│ │ [Job3]   │ │
-│ └──────┬───┘ │
-└────────┼─────┘
-         │ HTTPS
-         ▼
-┌─────────────────┐
-│  Colab Server   │  외부 음원 분리 서버
-│  (Demucs GPU)   │  - 보컬/MR 분리
-└─────────────────┘  - 분리 파일 반환
+```mermaid
+graph TB
+    Client["Client (Browser)<br/>Next.js - 악보 렌더링 및 오디오 플레이어<br/>3초 폴링으로 작업 상태 조회"]
+    Nginx["Nginx<br/>리버스 프록시, 라우팅"]
+    Flask["Flask API"]
+    NextApp["Client Next"]
+    MinIO["MinIO (Storage)<br/>오브젝트 스토리지<br/>원본 파일만 저장"]
+    Queue["Job Queue (deque)<br/>인메모리 작업 대기열<br/>- 순차 처리<br/>- 대기열 제한 (MAX: 3명)<br/>- 이벤트 기반 워커"]
+    Colab["Colab Server (외부 음원 분리)<br/>Demucs GPU<br/>- 보컬/MR 분리<br/>- 분리 파일 반환"]
+
+    Client -->|HTTP| Nginx
+    Nginx --> Flask
+    Nginx --> NextApp
+    Nginx --> MinIO
+    Flask --> Queue
+    Queue -->|HTTPS| Colab
 ```
 
 #### 배포 환경 (로컬 처리)
 > GPU 장착 서버에서 로컬 Demucs 모델 직접 실행
 
-```
-┌─────────────┐
-│   Client    │  Next.js (React) - 악보 렌더링 및 오디오 플레이어
-│  (Browser)  │  - 3초 폴링으로 작업 상태 조회
-└──────┬──────┘
-       │ HTTPS
-┌──────▼──────┐
-│    Nginx    │  리버스 프록시, 라우팅, HTTPS 처리
-│   (Proxy)   │  - Let's Encrypt SSL/TLS
-│             │  - Certbot 자동 갱신 (12시간마다 체크)
-└──────┬──────┘
-       │
-   ┌───┴───────────┬─────────┐
-   │               │         │
-┌──▼───────────┐ ┌─▼────┐ ┌──▼───────┐
-│  Flask API   │ │Client│ │  MinIO   │  오브젝트 스토리지
-│              │ │Next  │ │(Storage) │  - 원본 파일
-│ ┌──────────┐ │ └──────┘ └────▲─────┘  - 분리된 파일
-│ │ Job Queue│ │               │
-│ │  (deque) │ │  인메모리 작업 대기열          │
-│ │          │ │  - 순차 처리                  │
-│ │ [Job1]   │ │  - 대기열 제한 (MAX: 3명)     │
-│ │ [Job2]   │ │  - 이벤트 기반 워커           │
-│ │ [Job3]   │ │                              │
-│ └──────┬───┘ │                              │
-│        │     │                              │
-│  ┌─────▼────┐│                              │
-│  │ Demucs AI││  GPU 자동 감지 (CUDA/CPU)     │
-│  │(로컬 GPU) ││  - 보컬/MR 분리              │
-│  └─────┬────┘│  - MinIO 저장                │
-└────────┼─────┘                              │
-         └────────────────────────────────────┘
+```mermaid
+graph TB
+    Client["Client (Browser)<br/>Next.js - 악보 렌더링 및 오디오 플레이어<br/>3초 폴링으로 작업 상태 조회"]
+    Nginx["Nginx<br/>리버스 프록시, 라우팅, HTTPS 처리<br/>- Let's Encrypt SSL/TLS<br/>- Certbot 자동 갱신 (12시간마다 체크)"]
+    Flask["Flask API"]
+    NextApp["Client Next"]
+    MinIO["MinIO (Storage)<br/>오브젝트 스토리지<br/>- 원본 파일<br/>- 분리된 파일"]
+    Queue["Job Queue (deque)<br/>인메모리 작업 대기열<br/>- 순차 처리<br/>- 대기열 제한 (MAX: 3명)<br/>- 이벤트 기반 워커"]
+    Demucs["Demucs AI (로컬 GPU)<br/>GPU 자동 감지 (CUDA/CPU)<br/>- 보컬/MR 분리<br/>- MinIO 저장"]
+
+    Client -->|HTTPS| Nginx
+    Nginx --> Flask
+    Nginx --> NextApp
+    Nginx --> MinIO
+    Flask --> Queue
+    Queue --> Demucs
+    Demucs --> MinIO
 ```
 
 ---
