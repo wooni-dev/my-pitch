@@ -189,7 +189,7 @@
 **선택 이유**
 - 음정 분석을 위해서는 정확한 보컬 분리가 필수적
 - 사용자가 기다릴 수 있는 합리적인 처리 시간 제공
-- 활발한 커뮤니티와 지속적인 모델 업데이트
+- MDX Challenge 2021 (Music Demixing Challenge) 우승 모델로 검증된 성능
 
 ### Certbot (Let's Encrypt)
 
