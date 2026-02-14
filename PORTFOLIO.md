@@ -19,9 +19,9 @@
 
 ### 기술 스택
 
-- **Frontend**: Next.js, VexFlow
-- **Backend**: Python, Flask, Librosa, Demucs
-- **Infrastructure**: Docker, Nginx, MinIO
+- **Frontend**: Next.js, VexFlow (악보 렌더링)
+- **Backend**: Python, Flask, Librosa (음정 분석), Demucs (AI 음원 분리)
+- **Infrastructure**: Docker, Nginx, MinIO (파일 스토리지)
 
 ---
 
