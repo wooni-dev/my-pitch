@@ -5,28 +5,36 @@
 ## 🎬 데모 영상
 
 ### 1. My Pitch 사용법
-[![My Pitch 사용법](https://img.youtube.com/vi/GLUyXqzLyqg/maxresdefault.jpg)](https://youtu.be/GLUyXqzLyqg)
+<a href="https://youtu.be/GLUyXqzLyqg" target="_blank">
+  <img src="https://img.youtube.com/vi/GLUyXqzLyqg/maxresdefault.jpg" alt="My Pitch 사용법">
+</a>
 
 음악 파일 업로드부터 음원 분리, 음정 분석, 악보 변환까지 전체 사용 흐름을 보여줍니다. VexFlow를 활용한 악보 렌더링과 오디오 동기화 재생 기능을 확인할 수 있습니다.
 
 ---
 
 ### 2. My Pitch 순번 대기
-[![My Pitch 순번 대기](https://img.youtube.com/vi/FFLvpNCe9uM/maxresdefault.jpg)](https://youtu.be/FFLvpNCe9uM)
+<a href="https://youtu.be/FFLvpNCe9uM" target="_blank">
+  <img src="https://img.youtube.com/vi/FFLvpNCe9uM/maxresdefault.jpg" alt="My Pitch 순번 대기">
+</a>
 
 인메모리 작업 큐 시스템의 동작 방식과 대기열 UX를 보여줍니다. 이벤트 기반 워커를 통한 순차 처리와 사용자에게 실시간으로 대기 순번을 안내하는 방식을 확인할 수 있습니다.
 
 ---
 
 ### 3. MinIO 파일 관리
-[![MinIO 파일 관리](https://img.youtube.com/vi/J6G-9mkcc1Y/maxresdefault.jpg)](https://youtu.be/J6G-9mkcc1Y)
+<a href="https://youtu.be/J6G-9mkcc1Y" target="_blank">
+  <img src="https://img.youtube.com/vi/J6G-9mkcc1Y/maxresdefault.jpg" alt="MinIO 파일 관리">
+</a>
 
 악보 변환 과정에서 생성되는 원본 파일, 분리된 보컬/MR 파일들을 MinIO 오브젝트 스토리지에서 관리하는 방법을 보여줍니다. Presigned URL을 통한 안전한 파일 접근 방식을 확인할 수 있습니다.
 
 ---
 
 ### 4. My Pitch 모바일 사용법
-[![My Pitch 모바일 사용법](https://img.youtube.com/vi/dIEL0GkP-BA/maxresdefault.jpg)](https://youtu.be/dIEL0GkP-BA)
+<a href="https://youtu.be/dIEL0GkP-BA" target="_blank">
+  <img src="https://img.youtube.com/vi/dIEL0GkP-BA/maxresdefault.jpg" alt="My Pitch 모바일 사용법">
+</a>
 
 모바일 환경에서의 반응형 디자인과 사용자 경험을 보여줍니다. 화면 크기에 따라 자동으로 조정되는 악보 레이아웃과 터치 인터랙션을 확인할 수 있습니다.
 
