@@ -9,7 +9,7 @@
 <td width="50%">
 
 ### 1. My Pitch 사용법
-[![My Pitch 사용법](https://img.youtube.com/vi/GLUyXqzLyqg/maxresdefault.jpg)](https://youtu.be/GLUyXqzLyqg)
+[![My Pitch 사용법](https://img.youtube.com/vi/IJ230xx4sC8/maxresdefault.jpg)](https://youtu.be/IJ230xx4sC8)
 
 음악 파일 업로드부터 음원 분리, 음정 분석, 악보 변환까지 전체 사용 흐름을 보여줍니다. VexFlow를 활용한 악보 렌더링과 오디오 동기화 재생 기능을 확인할 수 있습니다.
 
